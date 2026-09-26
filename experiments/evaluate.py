@@ -132,6 +132,15 @@ def hit(pred: list[str], truth: str, k: int) -> bool:
     return truth in pred[:k]
 
 
+def comp(label: str) -> str:
+    """Component = node:kind:name without the occurrence number."""
+    return label.split("#")[0]
+
+
+def hit_comp(pred: list[str], truth: str, k: int) -> bool:
+    return comp(truth) in [comp(p) for p in list(dict.fromkeys(comp(x) for x in pred))[:k]]
+
+
 def main(judge: bool = True, replay: bool = True) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     base_all = load("baseline")
@@ -186,7 +195,10 @@ def main(judge: bool = True, replay: bool = True) -> None:
             "gate_regressed_tasks": g.regressed_tasks, "gate_reason": g.reason,
         })  # fmt: skip
 
-        # localization pairs (regression mode): baseline passes (all 16) vs candidate failures
+        effective = hi16 < 0
+        # localization pairs (regression mode): baseline passes (all 16) vs candidate failures.
+        # Ground truth is only meaningful when the fault actually causes failures, so the judge and
+        # replay (the expensive methods) run only for faults whose measured effect CI excludes 0.
         n_replayed = 0
         for tid in tids:
             passing = [r for r in xb[tid] if r.outcome.passed]
@@ -199,16 +211,16 @@ def main(judge: bool = True, replay: bool = True) -> None:
             timing["divergence_s"].append(time.perf_counter() - t0)
             rep_fail = next(r for r in failing if first_fired(r))
             row = {"fault": f.id, "task": tid, "truth": truth, "n_pass": len(passing), "n_fail": len(failing),
-                   "n_fail_fired": n_fired, "intermittent": f.intermittent,
+                   "n_fail_fired": n_fired, "intermittent": f.intermittent, "effective": effective,
                    "n_labels": len(set(step_labels(rep_fail.steps))),
                    "agentdiff": div.predicted_labels, "agentdiff_confidence": div.confidence,
                    "last_failing_step": last_failing_step(rep_fail)}  # fmt: skip
-            if judge:
+            if judge and effective:
                 row["judge"], dt = llm_judge(rep_fail, None)
                 timing["judge_s"].append(dt)
                 row["judge_with_pass"], dt = llm_judge(rep_fail, div and next(r for r in passing if r.run_id == div.reference_run))
                 timing["judge_pair_s"].append(dt)
-            if replay and n_replayed < REPLAY_PAIRS_PER_FAULT:
+            if replay and effective and n_replayed < REPLAY_PAIRS_PER_FAULT:
                 n_replayed += 1
                 h = make_harness(f.id, fault=f, tasks=[tid])
                 t0 = time.perf_counter()
@@ -231,6 +243,7 @@ def main(judge: bool = True, replay: bool = True) -> None:
                 if len(passing) >= 2 and failing and truth:
                     div = find_divergence(passing, failing, mode="flaky")
                     pairs.append({"fault": f.id, "task": tid, "truth": truth, "mode": "flaky", "n_pass": len(passing),
+                                  "effective": effective,
                                   "n_fail": len(failing), "agentdiff": div.predicted_labels, "intermittent": True,
                                   "agentdiff_confidence": div.confidence})  # fmt: skip
 
@@ -241,9 +254,10 @@ def main(judge: bool = True, replay: bool = True) -> None:
     write_tables(detection, null_rows, aa_splits, pairs, replays, timing)
 
 
-def _acc(rows: list[dict], key: str, k: int) -> tuple[int, int]:
+def _acc(rows: list[dict], key: str, k: int, component: bool = False) -> tuple[int, int]:
     rows = [r for r in rows if key in r]
-    return sum(hit(r[key], r["truth"], k) for r in rows), len(rows)
+    f = hit_comp if component else hit
+    return sum(f(r[key], r["truth"], k) for r in rows), len(rows)
 
 
 def _fmt(h: int, n: int) -> str:
@@ -273,16 +287,22 @@ def write_tables(detection, nulls, aa, pairs, replays, timing) -> None:  # noqa:
         L.append(f"| {n['id']}: {n['description']} | {'yes' if n['regression'] else 'no'} | {n['delta']:+.3f} | {n['p_worse']:.2g} |")
     L.append(f"\nA/A resampling: {aa['false_alarms']}/{aa['splits']} random 8-vs-8 splits of the 16-run baseline flagged "
              f"= {aa['rate']:.1%} (95% CI {aa['ci'][0]:.1%}-{aa['ci'][1]:.1%}); splits overlap, so this is a rate estimate, not {aa['splits']} independent tests.")
-    reg = [p for p in pairs if p.get("mode") != "flaky"]
-    flk = [p for p in pairs if p.get("mode") == "flaky"]
-    L.append(f"\n## Localization: is the true cause step in the top-1 / top-3? ({len(reg)} regression-mode pairs)\n")
-    L.append("| Method | Top-1 | Top-3 |\n|---|---|---|")
+    reg_all = [p for p in pairs if p.get("mode") != "flaky"]
+    reg = [p for p in reg_all if p.get("effective")]
+    flk = [p for p in pairs if p.get("mode") == "flaky" and p.get("effective")]
+    eff_ids = sorted({p["fault"] for p in reg})
+    L.append(f"\n## Localization: is the true cause step in the top-1 / top-3? ({len(reg)} regression-mode pairs "
+             f"from the {len(eff_ids)} faults with a measured effect: {', '.join(eff_ids)})\n")
+    L.append("| Method | Step top-1 | Step top-3 | Component top-1 | Component top-3 |\n|---|---|---|---|---|")
     rnd1 = np.mean([1 / p["n_labels"] for p in reg]) if reg else 0
     rnd3 = np.mean([min(1, 3 / p["n_labels"]) for p in reg]) if reg else 0
     for name, key in [("agentdiff divergence", "agentdiff"), ("LLM judge (failing run only)", "judge"),
                       ("LLM judge (+ one passing run)", "judge_with_pass"), ("Last failing step (naive rule)", "last_failing_step")]:
-        L.append(f"| {name} | {_fmt(*_acc(reg, key, 1))} | {_fmt(*_acc(reg, key, 3))} |")
-    L.append(f"| Random step (expected) | {rnd1:.0%} | {rnd3:.0%} |")
+        L.append(f"| {name} | {_fmt(*_acc(reg, key, 1))} | {_fmt(*_acc(reg, key, 3))} | "
+                 f"{_fmt(*_acc(reg, key, 1, True))} | {_fmt(*_acc(reg, key, 3, True))} |")
+    L.append(f"| Random step (expected) | {rnd1:.0%} | {rnd3:.0%} | - | - |")
+    L.append("\nStep = exact label incl. occurrence (e.g. `patch_generator:llm:llm#1`); component = node:kind:name "
+             "(occurrence ignored; the agent's structured-output repair loop adds extra calls that shift occurrence numbers).")
     sub = [p for p in reg if "agentdiff_replay" in p]
     if sub:
         L.append(f"\nReplay subset ({len(sub)} pairs, up to {REPLAY_PAIRS_PER_FAULT} per fault):\n")
@@ -299,12 +319,13 @@ def write_tables(detection, nulls, aa, pairs, replays, timing) -> None:  # noqa:
                        ("observation faults (tool results)", [p for p in reg if p["intermittent"]]),
                        ("flaky mode (intermittent faults, within the faulty version)", flk)]:
         L.append(f"| {name} | {_fmt(*_acc(rows, 'agentdiff', 1))} | {_fmt(*_acc(rows, 'agentdiff', 3))} |")
-    L.append("\n### Per fault (agentdiff divergence top-1 hits / pairs)\n")
+    L.append("\n### Per fault (top-1 step hits / pairs; faults without a measured effect marked *)\n")
     L.append("| Fault | Pairs | agentdiff | judge (+pass) | last step |\n|---|---|---|---|---|")
     for f in FAULTS:
-        rows = [p for p in reg if p["fault"] == f.id]
+        rows = [p for p in reg_all if p["fault"] == f.id]
         if rows:
-            L.append(f"| {f.id} | {len(rows)} | {_acc(rows, 'agentdiff', 1)[0]} | {_acc(rows, 'judge_with_pass', 1)[0]} | "
+            star = "" if rows[0].get("effective") else "*"
+            L.append(f"| {f.id}{star} | {len(rows)} | {_acc(rows, 'agentdiff', 1)[0]} | {_acc(rows, 'judge_with_pass', 1)[0]} | "
                      f"{_acc(rows, 'last_failing_step', 1)[0]} |")
     L.append("\n## Cost and time per analysis (local model, $0 API cost)\n")
     for key, name in [("divergence_s", "divergence finder per pair"), ("judge_s", "LLM judge per pair (failing only)"),
