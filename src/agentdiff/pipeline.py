@@ -42,6 +42,7 @@ def regression_divergences(baseline: list[Trajectory], candidate: list[Trajector
 def replay_all(harness: Harness, trajs: list[Trajectory], divs: list[DivergenceResult], *, n_forks: int = 8,
                max_tasks: int = 3, budget: Budget | None = None, pricing: Pricing | None = None,
                reference_runs: list[Trajectory] | None = None) -> list[ReplayReport]:  # fmt: skip
+    """Confirm divergences by replay. With ``reference_runs`` (a baseline), use transplant."""
     groups = group_by_task(trajs)
     ref_groups = group_by_task(reference_runs) if reference_runs is not None else groups
     reports = []
@@ -49,7 +50,8 @@ def replay_all(harness: Harness, trajs: list[Trajectory], divs: list[DivergenceR
         passing, _ = _split(ref_groups.get(d.task_id, []))
         _, failing = _split(groups.get(d.task_id, []))
         if passing and failing:
-            reports.append(confirm(harness, d, failing, passing, n_forks=n_forks, budget=budget, pricing=pricing))
+            reports.append(confirm(harness, d, failing, passing, n_forks=n_forks, budget=budget, pricing=pricing,
+                                   intervention="transplant" if reference_runs is not None else "resample"))
     return reports
 
 

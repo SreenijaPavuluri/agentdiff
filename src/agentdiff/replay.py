@@ -6,7 +6,12 @@ For a candidate step s (taken from the divergence ranking) and a few failing bas
 * ``keep`` arm: replay the prefix *and* the recorded (failing) step s, run the rest live.
 
 Delta = pass_rate(resample) - pass_rate(keep). If step s caused the failure, re-drawing it
-should raise the pass rate relative to keeping it. The step is **confirmed causal** iff the
+should raise the pass rate relative to keeping it.
+
+For *regressions* (a deterministic change such as a prompt edit), re-drawing step s under the
+same faulty configuration cannot fix it, so the treatment arm is ``transplant`` instead: step s
+is replaced by the aligned step of the baseline's passing reference run ("what if this one
+step had come from the good version?"). The step is **confirmed causal** iff the
 Newcombe 95% CI for Delta excludes zero (lower bound > 0). Candidates are tested in rank
 order and testing stops at the first confirmed one, so the replay budget is spent on 1-3
 steps rather than every step of the run.
@@ -50,6 +55,7 @@ class CandidateTest(BaseModel):
 
 class ReplayReport(BaseModel):
     task_id: str
+    intervention: str = "resample"
     tests: list[CandidateTest]
     confirmed_label: str | None
     predicted_labels: list[str]  # confirmed first, then remaining divergence ranking
@@ -80,6 +86,7 @@ def confirm(
     pricing: Pricing | None = None,
     seed0: int = 100_000,
     stop_at_first: bool = True,
+    intervention: Literal["resample", "transplant"] = "resample",
 ) -> ReplayReport:
     ref = next(r for r in passing if r.run_id == div.reference_run)
     tests: list[CandidateTest] = []
@@ -100,6 +107,13 @@ def confirm(
                 bases.append((r, idx))
             if len(bases) >= max_base_runs:
                 break
+        transplant = None
+        if intervention == "transplant":
+            if col.kind != "step":
+                tests.append(CandidateTest(label=label, column=ci, fork_steps={}, resample=ArmResult(), keep=ArmResult(),
+                                           status="skipped-no-step"))  # fmt: skip
+                continue
+            transplant = ref.steps[col.j]
         test = CandidateTest(label=label, column=ci, fork_steps={r.run_id: i for r, i in bases},
                              resample=ArmResult(), keep=ArmResult(), status="skipped-no-step")  # fmt: skip
         if not bases:
@@ -116,11 +130,13 @@ def confirm(
         unsafe = False
         for arm_name in ("resample", "keep"):
             arm: ArmResult = getattr(test, arm_name)
+            how = intervention if arm_name == "resample" else "keep"
             for f in range(n_forks):
                 base, idx = bases[f % len(bases)]
                 seed += 1
                 try:
-                    tr = fork_run(harness, base, idx, arm_name, seed, budget=budget, pricing=pricing)  # type: ignore[arg-type]
+                    tr = fork_run(harness, base, idx, how, seed, transplant=transplant, budget=budget,  # type: ignore[arg-type]
+                                  pricing=pricing)
                 except ReplayDivergence:
                     arm.replay_divergences += 1
                     continue
@@ -153,7 +169,7 @@ def confirm(
     confirmed = next((t.label for t in tests if t.status == "confirmed"), None)
     predicted = ([confirmed] if confirmed else []) + [lab for lab in div.predicted_labels if lab != confirmed]
     return ReplayReport(
-        task_id=div.task_id, tests=tests, confirmed_label=confirmed, predicted_labels=predicted[: max(3, top_k)],
+        task_id=div.task_id, intervention=intervention, tests=tests, confirmed_label=confirmed, predicted_labels=predicted[: max(3, top_k)],
         total_cost_usd=sum(t.cost_usd for t in tests), total_wall_s=sum(t.wall_s for t in tests),
         total_forks=sum(t.resample.n + t.keep.n for t in tests),
     )  # fmt: skip

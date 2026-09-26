@@ -1,0 +1,4 @@
+  screen t01_sum_to seed=1000 PASS 31s
+  screen t02_binary_search seed=1000 PASS 30s
+  screen t03_mutable_default seed=1000 PASS 34s
+  screen t04_palindrome seed=1000 PASS 25s

@@ -115,14 +115,19 @@ class _TapedLLM:
         self.tape, self.models, self.default, self.fault = tape, models, default, fault
         self.seed, self.temperature = seed, temperature
         self.calls: Counter[str] = Counter()
+        self.fired: list[int] = []
 
     def complete(self, system: str, user: str) -> LLMResponse:
         node = node_of(system)
         self.calls[node] += 1
         occ = self.calls[node]
-        system, user = self.fault.patch_request(node, occ, system, user)
+        new_system, new_user = self.fault.patch_request(node, occ, system, user)
+        fired = (new_system, new_user) != (system, user)
+        system, user = new_system, new_user
         model_name = self.fault.model_for(node) or self.default
         temp = self.fault.temperature_for(node)
+        if fired or model_name != self.default or temp is not None:
+            self.fired.append(len(self.tape.steps))
         temp = self.temperature if temp is None else temp
         call_seed = (self.seed * 1_000_003 + occ * 7919 + hash(node) % 997) % (2**31)
         request = {"system": system, "user": user, "model": model_name, "temperature": temp}
@@ -140,14 +145,20 @@ class _TapedTools(ToolRegistry):
         super().__init__(sandbox)
         self.tape, self.fault, self.rng = tape, fault, rng
         self.calls: Counter[tuple[str, str]] = Counter()
+        self.fired: list[int] = []
 
     def invoke(self, name: str, node: str, **kwargs: Any) -> tuple[Any, ToolCallRecord]:
         self.calls[(node, name)] += 1
         occ = self.calls[(node, name)]
 
+        index = len(self.tape.steps)
+
         def call() -> tuple[Any, ToolCallRecord]:
             result, rec = ToolRegistry.invoke(self, name, node, **kwargs)
-            return self.fault.patch_tool(node, name, occ, result, self.rng), rec
+            patched = self.fault.patch_tool(node, name, occ, result, self.rng)
+            if patched is not result:
+                self.fired.append(index)
+            return patched, rec
 
         def encode(value: tuple[Any, ToolCallRecord]) -> dict[str, Any]:
             result, rec = value
@@ -192,7 +203,12 @@ class CodeVerifyHarness:
         llm = _TapedLLM(tape, self.models, self.default_model, self.fault, seed, self.temperature)
         tools = _TapedTools(SubprocessSandbox(timeout_s=self.settings.sandbox_timeout_s), tape, self.fault, env_rng)
         graph = build_graph(self.settings, llm=llm, tools=tools)
-        state = graph.invoke({"task": item.task, "step_count": 0}, graph_config(self.settings, f"{task_id}-{seed}"))
+        try:
+            state = graph.invoke({"task": item.task, "step_count": 0}, graph_config(self.settings, f"{task_id}-{seed}"))
+        finally:
+            for idx in sorted(set(llm.fired + tools.fired)):  # ground truth for fault-injection experiments
+                if idx < len(tape.steps) and not tape.steps[idx].meta.get("replayed"):
+                    tape.steps[idx].meta["fault_fired"] = self.fault.id
         code = state.get("final_code") if state.get("status") == "resolved" else None
         visible = hidden = False
         if code:

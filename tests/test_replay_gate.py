@@ -126,3 +126,17 @@ def test_reliability_and_clustering_on_toy_suite() -> None:
     assert sum(len(m.members) for m in modes) == len(divs)
     labels = {m.step_labels[0] for m in modes}
     assert "planner:llm:llm" in labels
+
+
+def test_transplant_confirms_a_deterministic_regression() -> None:
+    """A version that always opens the wrong file: resampling cannot help, transplanting the good step can."""
+    good = ToyAgent(version="good", p_wrong_file={"t4_encoding": 0.0})
+    bad = ToyAgent(version="bad", p_wrong_file={"t4_encoding": 1.0})
+    base = run_suite(good, ["t4_encoding"], k=6)
+    cand = run_suite(bad, ["t4_encoding"], k=6, seed0=50)
+    div = find_divergence(base, cand, mode="regression")
+    assert div.predicted_labels[0] == "planner:llm:llm#1"
+    res = confirm(bad, div, cand, base, n_forks=6, intervention="resample")
+    assert res.confirmed_label is None  # re-drawing under the faulty policy never fixes it
+    tr = confirm(bad, div, cand, base, n_forks=6, intervention="transplant")
+    assert tr.confirmed_label == "planner:llm:llm#1" and tr.tests[0].resample.passed == 6

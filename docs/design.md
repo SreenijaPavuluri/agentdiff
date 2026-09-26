@@ -1,6 +1,6 @@
 # agentdiff design
 
-Status: **draft for review**. Nothing below has been built or run yet. Any number in this document is either a definition or a cost estimate.
+Status: **implemented**. This document was written before the build and has been updated where the implementation changed the plan; every change is listed in §12. Numbers here are definitions, not results; results are in `results/tables.md`.
 
 ## 1. Goals and non-goals
 
@@ -448,3 +448,46 @@ Wall clock is several hours at concurrency 8. These are estimates only. The smok
 8. Fault registry, then the smoke test, then the cost check with you, then the full evaluation.
 9. README with real numbers, GitHub Actions and the demo PR.
 10. Push to GitHub.
+
+## 12. Changes made during implementation (and why)
+
+1. **Zero-cost model setup.** The owner asked for $0 spend. All agent runs use a local model,
+   `qwen2.5-coder:1.5b` via Ollama on an 8 GB M1, with `qwen2.5-coder:0.5b` for the model-swap fault.
+   One run takes about 30-45 s. That forced a smaller evaluation:
+   - 10 tasks, chosen by a separate screening run whose seeds are not reused;
+   - a 16-run baseline;
+   - k = 8 per fault;
+   - replay on at most 2 pairs per fault.
+   The LLM-judge baseline also uses the 1.5B model. That makes it weaker than a frontier judge, and
+   the results say so.
+2. **Per-position test uses nearest-passing-neighbour distances, not a binary "deviates from the reference".**
+   - The plan in §5.3 marked each step of each run as deviating or not, compared with a single reference run.
+   - Free-text LLM outputs differ in every run, so that binary flag was true at every LLM step.
+     Distinct correct fixes also differ from each other.
+   - Each column now gets a distance per run: the distance to the nearest *passing* run's step
+     (leave-one-out for passing runs). An exact one-sided permutation test then asks whether failing
+     runs have larger distances than passing runs.
+   - The divergence step is still "earliest column that is significant (alpha = 0.05) with effect ≥ 0.1".
+3. **Normalised `view` of a decision.** A harness may attach a normalised projection of each LLM reply, and the
+   comparison uses that projection. For code-verify-agents:
+   - the planned tool list;
+   - the set of cited suspect lines;
+   - the AST-canonicalised patched module.
+   Formatting noise and free-text rationales therefore do not count as divergence.
+4. **Insertion columns.** Extra steps in a failing run, such as retries, are placed in their own "insertion"
+   columns between reference steps. A retry loop can therefore be reported as the divergence
+   (label = the first inserted step).
+5. **Transplant for regressions.**
+   - In regression mode the cause is a deterministic configuration change, such as a prompt edit.
+     Re-drawing the step under that same configuration cannot fix it, so `resample` would wrongly
+     reject a real cause.
+   - Regression mode therefore replaces the candidate's step with the aligned step from the
+     baseline's passing reference run (`transplant`), and compares that against `keep`.
+   - Flaky mode keeps `resample`.
+6. **Mechanical ground truth.** The harness marks every step where a fault hook actually changed a request, a
+   model/temperature setting, or a tool result (`meta.fault_fired`). The true cause of a failing run is its first such step.
+   The expected labels in the fault registry are kept as documentation, and the registry's hash is recorded
+   before the fault runs.
+7. **Fault list.** Planner-level faults were replaced with others. In code-verify-agents the plan only chooses
+   which inspection tools run, and the plan schema forces `run_tests`, so planner faults were unlikely to
+   change outcomes. See `experiments/faults.py` for the final 13 faults and the whitespace-only null edit.
