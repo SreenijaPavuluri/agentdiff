@@ -1,0 +1,15 @@
+                          baseline -> candidate-harmless                          
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ task         ┃ baseline ┃ candidate ┃ p(worse) ┃ Holm  ┃ verdict               ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+│ t3_sorting   │ 7/8      │ 3/8       │ 0.0594   │ 0.357 │ no significant change │
+│ t1_offbyone  │ 7/8      │ 7/8       │ 0.767    │ 1     │ no significant change │
+│ t5_unit      │ 7/8      │ 7/8       │ 0.767    │ 1     │ no significant change │
+│ t6_cache     │ 6/8      │ 6/8       │ 0.715    │ 1     │ no significant change │
+│ t2_nullcheck │ 5/8      │ 6/8       │ 0.859    │ 1     │ no significant change │
+│ t4_encoding  │ 5/8      │ 6/8       │ 0.859    │ 1     │ no significant change │
+└──────────────┴──────────┴───────────┴──────────┴───────┴───────────────────────┘
+overall delta -0.042 CI [-0.292, +0.188] p(worse)=0.407
+OK: no statistically significant regression
+report: examples/demo_pr/output/compare-harmless.html
+exit=0

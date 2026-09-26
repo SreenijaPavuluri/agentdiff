@@ -1,0 +1,12 @@
+# Demo: gate every PR that touches the demo agent's prompt.
+name: demo-gate
+on:
+  pull_request:
+    paths: ["examples/demo_pr/**"]
+jobs:
+  gate:
+    uses: ./.github/workflows/agentdiff-gate.yml
+    with:
+      harness: "examples.demo_pr.agent:make_harness"
+      k: 8
+      agentdiff-spec: "."

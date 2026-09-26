@@ -1,0 +1,92 @@
+{
+ "baseline": "baseline",
+ "candidate": "candidate-bad",
+ "n_tasks": 6,
+ "alpha": 0.05,
+ "overall_delta": -0.3125,
+ "overall_ci": [
+  -0.5625,
+  -0.08333333333333333
+ ],
+ "overall_p_worse": 0.0009240876170284172,
+ "overall_p_better": 0.9998265189454772,
+ "overall_method": "exact (convolved hypergeometric)",
+ "tasks": [
+  {
+   "task_id": "t1_offbyone",
+   "base_pass": 7,
+   "base_n": 8,
+   "cand_pass": 6,
+   "cand_n": 8,
+   "delta": -0.125,
+   "p_worse": 0.5,
+   "p_worse_holm": 1.0,
+   "p_better": 0.9,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t2_nullcheck",
+   "base_pass": 5,
+   "base_n": 8,
+   "cand_pass": 3,
+   "cand_n": 8,
+   "delta": -0.25,
+   "p_worse": 0.30963480963480966,
+   "p_worse_holm": 1.0,
+   "p_better": 0.934032634032634,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t3_sorting",
+   "base_pass": 7,
+   "base_n": 8,
+   "cand_pass": 2,
+   "cand_n": 8,
+   "delta": -0.625,
+   "p_worse": 0.020279720279720283,
+   "p_worse_holm": 0.1013986013986014,
+   "p_better": 0.9993006993006993,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t4_encoding",
+   "base_pass": 5,
+   "base_n": 8,
+   "cand_pass": 0,
+   "cand_n": 8,
+   "delta": -0.625,
+   "p_worse": 0.012820512820512818,
+   "p_worse_holm": 0.07692307692307691,
+   "p_better": 1.0,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t5_unit",
+   "base_pass": 7,
+   "base_n": 8,
+   "cand_pass": 6,
+   "cand_n": 8,
+   "delta": -0.125,
+   "p_worse": 0.5,
+   "p_worse_holm": 1.0,
+   "p_better": 0.9,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t6_cache",
+   "base_pass": 6,
+   "base_n": 8,
+   "cand_pass": 5,
+   "cand_n": 8,
+   "delta": -0.125,
+   "p_worse": 0.5,
+   "p_worse_holm": 1.0,
+   "p_better": 0.8589743589743589,
+   "verdict": "no significant change"
+  }
+ ],
+ "regressed_tasks": [],
+ "improved_tasks": [],
+ "regression": true,
+ "reason": "overall pass rate dropped -0.312 (stratified exact p=0.00092 < 0.025)"
+}

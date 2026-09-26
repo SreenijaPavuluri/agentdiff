@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agentdiff compare · baseline → candidate-harmless</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fcfcfb; --panel: #ffffff; --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #85847f;
+  --rule: #e4e3de; --grid: #ecebe7; --s1: #2a78d6; --s2: #eb6834;
+  --good: #0c7a3e; --bad: #b42318; --warn: #8a5a00; --add-bg: #e7f5ec; --del-bg: #fdecec; --code-bg: #f5f4f1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1a1a19; --panel: #222220; --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+    --rule: #34332f; --grid: #2c2b28; --s1: #3987e5; --s2: #d95926;
+    --good: #4cc38a; --bad: #ff8a80; --warn: #e0b04a; --add-bg: #173323; --del-bg: #3a1c1c; --code-bg: #2a2926;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1a1a19; --panel: #222220; --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+  --rule: #34332f; --grid: #2c2b28; --s1: #3987e5; --s2: #d95926;
+  --good: #4cc38a; --bad: #ff8a80; --warn: #e0b04a; --add-bg: #173323; --del-bg: #3a1c1c; --code-bg: #2a2926;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 28px 16px 64px; }
+h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 19px; margin: 40px 0 10px; padding-top: 14px; border-top: 1px solid var(--rule); }
+h3 { font-size: 15px; margin: 22px 0 8px; }
+.sub { color: var(--ink-2); margin: 0 0 18px; }
+.muted { color: var(--ink-3); font-size: 13px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.tile { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; }
+.tile .k { color: var(--ink-2); font-size: 13px; }
+.tile .v { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.tile .ci { color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 13px; }
+td.num, th.num { text-align: right; }
+.badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--rule); white-space: nowrap; }
+.badge.good { color: var(--good); } .badge.bad { color: var(--bad); } .badge.warn { color: var(--warn); }
+.chart { width: 100%; max-width: 620px; height: auto; display: block; }
+.chart .grid { stroke: var(--grid); stroke-width: 1; }
+.chart .axis { fill: var(--ink-3); font-size: 11px; }
+.chart .label { fill: var(--ink-2); font-size: 12px; }
+.chart .line { fill: none; stroke-width: 2; }
+.chart .line.s1, .chart .whisker.s1 { stroke: var(--s1); } .chart .line.s2, .chart .whisker.s2 { stroke: var(--s2); }
+.chart .whisker { stroke-width: 1.5; opacity: .6; }
+.chart .dot { stroke: var(--bg); stroke-width: 2; } .chart .dot.s1 { fill: var(--s1); } .chart .dot.s2 { fill: var(--s2); }
+.chart .hit { fill: transparent; } .chart .pt:hover .dot { r: 6; }
+.legend { display: flex; gap: 16px; color: var(--ink-2); font-size: 13px; margin: 4px 0 8px; }
+.legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.side { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 720px) { .side { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px; min-width: 0; }
+.card h4 { margin: 0 0 6px; font-size: 13px; color: var(--ink-2); }
+pre { background: var(--code-bg); border-radius: 8px; padding: 10px; overflow-x: auto; font-size: 12px; line-height: 1.45; margin: 6px 0; max-height: 360px; }
+pre .add { background: var(--add-bg); display: block; } pre .del { background: var(--del-bg); display: block; }
+details { margin: 10px 0; } summary { cursor: pointer; font-weight: 600; }
+code { font-size: 12.5px; }
+.verdict { font-size: 16px; font-weight: 650; }
+</style>
+</head>
+<body>
+<main>
+<h1>agentdiff compare · baseline → candidate-harmless</h1>
+<p class="sub">Generated 2026-09-26 01:11 UTC</p>
+<p class="muted">Divergence in this report is computed in regression mode: baseline passing runs vs candidate failing runs.</p>
+
+
+<h2>Regression gate: baseline → candidate-harmless</h2>
+<p class="verdict"><span class="badge good">✓ no significant regression · exit 0</span></p>
+<p>no statistically significant regression.</p>
+<div class="tiles">
+  <div class="tile"><div class="k">Δ pass@1 (candidate − baseline)</div><div class="v">-0.042</div><div class="ci">95% CI -0.292 to 0.188</div></div>
+  <div class="tile"><div class="k">p (worse), stratified exact</div><div class="v">0.407</div><div class="ci">threshold α/2 = 0.025</div></div>
+  <div class="tile"><div class="k">Tasks regressed / improved</div><div class="v">0 / 0</div><div class="ci">Holm-adjusted Fisher, α/2</div></div>
+</div>
+<div class="scroll"><table>
+<thead><tr><th>Task</th><th class="num">Baseline</th><th class="num">Candidate</th><th class="num">Δ</th><th class="num">p (worse)</th><th class="num">Holm p</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td><code>t3_sorting</code></td><td class="num">7/8</td><td class="num">3/8</td><td class="num">-0.50</td><td class="num">0.059</td><td class="num">0.357</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t1_offbyone</code></td><td class="num">7/8</td><td class="num">7/8</td><td class="num">+0.00</td><td class="num">0.767</td><td class="num">1.000</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t5_unit</code></td><td class="num">7/8</td><td class="num">7/8</td><td class="num">+0.00</td><td class="num">0.767</td><td class="num">1.000</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t6_cache</code></td><td class="num">6/8</td><td class="num">6/8</td><td class="num">+0.00</td><td class="num">0.715</td><td class="num">1.000</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t2_nullcheck</code></td><td class="num">5/8</td><td class="num">6/8</td><td class="num">+0.12</td><td class="num">0.859</td><td class="num">1.000</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t4_encoding</code></td><td class="num">5/8</td><td class="num">6/8</td><td class="num">+0.12</td><td class="num">0.859</td><td class="num">1.000</td>
+<td><span class="muted">no significant change</span></td></tr>
+</tbody></table></div>
+<p class="muted">Method: exact (convolved hypergeometric). Per-task tests are one-sided Fisher exact with Holm correction; the two families split α so the family-wise false-alarm rate is ≤ α = 0.05.</p>
+
+
+
+<h2>Reliability · candidate-harmless</h2>
+<p class="sub">6 tasks × 8 runs</p>
+<div class="tiles">
+  <div class="tile"><div class="k">pass@1</div><div class="v">72.9%</div><div class="ci">95% CI 54.2% to 87.5%</div></div>
+
+  <div class="tile"><div class="k">pass@8</div><div class="v">100.0%</div><div class="ci">95% CI 100.0% to 100.0%</div></div>
+
+  <div class="tile"><div class="k">pass^8</div><div class="v">0.0%</div><div class="ci">95% CI 0.0% to 50.0%</div></div>
+
+  <div class="tile"><div class="k">Flaky / stable-fail tasks</div><div class="v">6 / 0</div><div class="ci">of 6</div></div>
+</div>
+<h3>Reliability decay</h3>
+<div class="legend"><span><i style="background:var(--s1)"></i>pass@k (any of k succeeds)</span><span><i style="background:var(--s2)"></i>pass^k (all k succeed)</span></div>
+<svg viewBox="0 0 560 240" role="img" aria-label="Reliability decay: pass@k and pass^k by k" class="chart"><line x1="44" x2="470" y1="206.0" y2="206.0" class="grid"/><text x="38" y="210.0" class="axis" text-anchor="end">0.00</text><line x1="44" x2="470" y1="158.5" y2="158.5" class="grid"/><text x="38" y="162.5" class="axis" text-anchor="end">0.25</text><line x1="44" x2="470" y1="111.0" y2="111.0" class="grid"/><text x="38" y="115.0" class="axis" text-anchor="end">0.50</text><line x1="44" x2="470" y1="63.5" y2="63.5" class="grid"/><text x="38" y="67.5" class="axis" text-anchor="end">0.75</text><line x1="44" x2="470" y1="16.0" y2="16.0" class="grid"/><text x="38" y="20.0" class="axis" text-anchor="end">1.00</text><text x="44.0" y="228" class="axis" text-anchor="middle">k=1</text><text x="186.0" y="228" class="axis" text-anchor="middle">k=2</text><text x="328.0" y="228" class="axis" text-anchor="middle">k=4</text><text x="470.0" y="228" class="axis" text-anchor="middle">k=8</text><path d="M44.0,67.5 L186.0,30.7 L328.0,18.3 L470.0,16.0" class="line s1"/><g class="pt"><line x1="44.0" x2="44.0" y1="103.1" y2="39.8" class="whisker s1"/><circle cx="44.0" cy="67.5" r="4.5" class="dot s1"/><circle cx="44.0" cy="67.5" r="12" class="hit"><title>pass@k, k=1: 0.729 (95% CI 0.542-0.875)</title></circle></g><g class="pt"><line x1="186.0" x2="186.0" y1="68.0" y2="18.3" class="whisker s1"/><circle cx="186.0" cy="30.7" r="4.5" class="dot s1"/><circle cx="186.0" cy="30.7" r="12" class="hit"><title>pass@k, k=2: 0.923 (95% CI 0.726-0.988)</title></circle></g><g class="pt"><line x1="328.0" x2="328.0" y1="47.7" y2="16.0" class="whisker s1"/><circle cx="328.0" cy="18.3" r="4.5" class="dot s1"/><circle cx="328.0" cy="18.3" r="12" class="hit"><title>pass@k, k=4: 0.988 (95% CI 0.833-1.000)</title></circle></g><g class="pt"><line x1="470.0" x2="470.0" y1="16.0" y2="16.0" class="whisker s1"/><circle cx="470.0" cy="16.0" r="4.5" class="dot s1"/><circle cx="470.0" cy="16.0" r="12" class="hit"><title>pass@k, k=8: 1.000 (95% CI 1.000-1.000)</title></circle></g><text x="480.0" y="20.0" class="label">pass@k</text><path d="M44.0,67.5 L186.0,104.2 L328.0,154.0 L470.0,206.0" class="line s2"/><g class="pt"><line x1="44.0" x2="44.0" y1="103.1" y2="39.8" class="whisker s2"/><circle cx="44.0" cy="67.5" r="4.5" class="dot s2"/><circle cx="44.0" cy="67.5" r="12" class="hit"><title>pass^k, k=1: 0.729 (95% CI 0.542-0.875)</title></circle></g><g class="pt"><line x1="186.0" x2="186.0" y1="146.1" y2="56.7" class="whisker s2"/><circle cx="186.0" cy="104.2" r="4.5" class="dot s2"/><circle cx="186.0" cy="104.2" r="12" class="hit"><title>pass^k, k=2: 0.536 (95% CI 0.315-0.786)</title></circle></g><g class="pt"><line x1="328.0" x2="328.0" y1="185.2" y2="86.1" class="whisker s2"/><circle cx="328.0" cy="154.0" r="4.5" class="dot s2"/><circle cx="328.0" cy="154.0" r="12" class="hit"><title>pass^k, k=4: 0.274 (95% CI 0.110-0.631)</title></circle></g><g class="pt"><line x1="470.0" x2="470.0" y1="206.0" y2="111.0" class="whisker s2"/><circle cx="470.0" cy="206.0" r="4.5" class="dot s2"/><circle cx="470.0" cy="206.0" r="12" class="hit"><title>pass^k, k=8: 0.000 (95% CI 0.000-0.500)</title></circle></g><text x="480.0" y="210.0" class="label">pass^k</text></svg>
+<p class="muted">Whiskers: 95% two-stage bootstrap CIs (tasks, then runs within task). Hover a point for values.</p>
+
+<h3>Flaky tasks, ranked by suite pass^8 gain if fixed</h3>
+<div class="scroll"><table>
+<thead><tr><th>#</th><th>Task</th><th class="num">Passes</th><th class="num">pass@1 (95% CI)</th><th class="num">pass^8</th><th class="num">Gain if fixed</th><th>Divergence</th></tr></thead><tbody>
+
+<tr><td>1</td><td><code>t1_offbyone</code></td><td class="num">7/8</td>
+<td class="num">87.5% (47.3%–99.7%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><span class="muted">-</span></td></tr>
+
+<tr><td>2</td><td><code>t2_nullcheck</code></td><td class="num">6/8</td>
+<td class="num">75.0% (34.9%–96.8%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><span class="muted">-</span></td></tr>
+
+<tr><td>3</td><td><code>t3_sorting</code></td><td class="num">3/8</td>
+<td class="num">37.5% (8.5%–75.5%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><a href="#div-t3_sorting"><code>coder:tool:read_file#1</code></a></td></tr>
+
+<tr><td>4</td><td><code>t4_encoding</code></td><td class="num">6/8</td>
+<td class="num">75.0% (34.9%–96.8%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><span class="muted">-</span></td></tr>
+
+<tr><td>5</td><td><code>t5_unit</code></td><td class="num">7/8</td>
+<td class="num">87.5% (47.3%–99.7%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><span class="muted">-</span></td></tr>
+
+<tr><td>6</td><td><code>t6_cache</code></td><td class="num">6/8</td>
+<td class="num">75.0% (34.9%–96.8%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><span class="muted">-</span></td></tr>
+</tbody></table></div>
+
+
+<details><summary>All tasks (table view)</summary><div class="scroll"><table>
+<thead><tr><th>Task</th><th>Label</th><th class="num">Passes</th><th class="num">pass@1</th><th class="num">pass@2</th><th class="num">pass^2</th><th class="num">pass@4</th><th class="num">pass^4</th><th class="num">pass@8</th><th class="num">pass^8</th></tr></thead><tbody>
+<tr><td><code>t1_offbyone</code></td><td>flaky</td><td class="num">7/8</td>
+<td class="num">0.875</td><td class="num">1.000</td><td class="num">0.750</td><td class="num">1.000</td><td class="num">0.500</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t2_nullcheck</code></td><td>flaky</td><td class="num">6/8</td>
+<td class="num">0.750</td><td class="num">0.964</td><td class="num">0.536</td><td class="num">1.000</td><td class="num">0.214</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t3_sorting</code></td><td>flaky</td><td class="num">3/8</td>
+<td class="num">0.375</td><td class="num">0.643</td><td class="num">0.107</td><td class="num">0.929</td><td class="num">0.000</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t4_encoding</code></td><td>flaky</td><td class="num">6/8</td>
+<td class="num">0.750</td><td class="num">0.964</td><td class="num">0.536</td><td class="num">1.000</td><td class="num">0.214</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t5_unit</code></td><td>flaky</td><td class="num">7/8</td>
+<td class="num">0.875</td><td class="num">1.000</td><td class="num">0.750</td><td class="num">1.000</td><td class="num">0.500</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t6_cache</code></td><td>flaky</td><td class="num">6/8</td>
+<td class="num">0.750</td><td class="num">0.964</td><td class="num">0.536</td><td class="num">1.000</td><td class="num">0.214</td><td class="num">1.000</td><td class="num">0.000</td></tr>
+</tbody></table></div></details>
+
+
+
+<h2>Recurring failure modes</h2>
+<p class="muted">Clusters are formed deterministically from divergence signatures; names are templates.</p>
+<div class="scroll"><table><thead><tr><th>Mode</th><th class="num">Tasks</th><th>Step</th><th>Kind</th><th>Tasks</th></tr></thead><tbody>
+<tr><td>observation divergence at coder:tool:read_file</td><td class="num">1</td><td><code>coder:tool:read_file</code></td><td>observation</td><td><code>t3_sorting</code></td></tr>
+</tbody></table></div>
+
+
+
+<h2>Where passing and failing runs split</h2>
+
+<details id="div-t3_sorting" open>
+<summary><code>t3_sorting</code> · <code>coder:tool:read_file#1</code> (observation) · 7 passing vs 5 failing (regression)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.441 (failing) vs 0.000 (passing), permutation p = 0.001; 0.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>coder:tool:read_file#1</code>, <code>coder:llm:llm#1</code>, <code>coder:tool:run_tests#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run b9384bb670f5)</h4><code>coder:tool:read_file#1</code><pre>{
+ "path": "order.py"
+}</pre></div>
+<div class="card"><h4>Failing (run 322dd826a336)</h4><code>coder:tool:read_file#1</code><pre>{
+ "path": "order.py"
+}</pre></div>
+</div>
+
+<h4 class="muted">Observation diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,15 +1,2 @@
+ # order.py for t3_sorting
+<span class="del">-def f0(x):</span><span class="del">-    return x + 0</span><span class="del">-def f1(x):</span><span class="del">-    return x + 1</span><span class="del">-def f2(x):</span><span class="del">-    return x + 2</span><span class="del">-def buggy(xs):</span><span class="del">-    return xs[1:]  # BUG: drops first element</span><span class="del">-def f3(x):</span><span class="del">-    return x + 3</span><span class="del">-def f4(x):</span><span class="del">-    return x + 4</span><span class="del">-def f5(x):</span><span class="del">-    return x + 5</span><span class="add">+def </span></pre>
+
+</details>
+
+
+
+<p class="muted" style="margin-top:40px">agentdiff · statistics: Clopper–Pearson, two-stage bootstrap, stratified exact (CMH-conditional) test, Fisher + Holm, Newcombe method 10.</p>
+</main>
+</body>
+</html>

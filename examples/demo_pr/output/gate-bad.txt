@@ -1,0 +1,15 @@
+                             baseline -> candidate-bad                             
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ task         ┃ baseline ┃ candidate ┃ p(worse) ┃ Holm   ┃ verdict               ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+│ t3_sorting   │ 7/8      │ 2/8       │ 0.0203   │ 0.101  │ no significant change │
+│ t4_encoding  │ 5/8      │ 0/8       │ 0.0128   │ 0.0769 │ no significant change │
+│ t2_nullcheck │ 5/8      │ 3/8       │ 0.31     │ 1      │ no significant change │
+│ t1_offbyone  │ 7/8      │ 6/8       │ 0.5      │ 1      │ no significant change │
+│ t5_unit      │ 7/8      │ 6/8       │ 0.5      │ 1      │ no significant change │
+│ t6_cache     │ 6/8      │ 5/8       │ 0.5      │ 1      │ no significant change │
+└──────────────┴──────────┴───────────┴──────────┴────────┴───────────────────────┘
+overall delta -0.312 CI [-0.562, -0.083] p(worse)=0.000924
+REGRESSION: overall pass rate dropped -0.312 (stratified exact p=0.00092 < 0.025)
+report: examples/demo_pr/output/compare-bad.html
+exit=1

@@ -1,0 +1,92 @@
+{
+ "baseline": "baseline",
+ "candidate": "candidate-harmless",
+ "n_tasks": 6,
+ "alpha": 0.05,
+ "overall_delta": -0.041666666666666664,
+ "overall_ci": [
+  -0.2916666666666667,
+  0.1875
+ ],
+ "overall_p_worse": 0.4072527645861118,
+ "overall_p_better": 0.7594457389457149,
+ "overall_method": "exact (convolved hypergeometric)",
+ "tasks": [
+  {
+   "task_id": "t1_offbyone",
+   "base_pass": 7,
+   "base_n": 8,
+   "cand_pass": 7,
+   "cand_n": 8,
+   "delta": 0.0,
+   "p_worse": 0.7666666666666666,
+   "p_worse_holm": 1.0,
+   "p_better": 0.7666666666666666,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t2_nullcheck",
+   "base_pass": 5,
+   "base_n": 8,
+   "cand_pass": 6,
+   "cand_n": 8,
+   "delta": 0.125,
+   "p_worse": 0.8589743589743589,
+   "p_worse_holm": 1.0,
+   "p_better": 0.5,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t3_sorting",
+   "base_pass": 7,
+   "base_n": 8,
+   "cand_pass": 3,
+   "cand_n": 8,
+   "delta": -0.5,
+   "p_worse": 0.05944055944055944,
+   "p_worse_holm": 0.35664335664335667,
+   "p_better": 0.9965034965034965,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t4_encoding",
+   "base_pass": 5,
+   "base_n": 8,
+   "cand_pass": 6,
+   "cand_n": 8,
+   "delta": 0.125,
+   "p_worse": 0.8589743589743589,
+   "p_worse_holm": 1.0,
+   "p_better": 0.5,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t5_unit",
+   "base_pass": 7,
+   "base_n": 8,
+   "cand_pass": 7,
+   "cand_n": 8,
+   "delta": 0.0,
+   "p_worse": 0.7666666666666666,
+   "p_worse_holm": 1.0,
+   "p_better": 0.7666666666666666,
+   "verdict": "no significant change"
+  },
+  {
+   "task_id": "t6_cache",
+   "base_pass": 6,
+   "base_n": 8,
+   "cand_pass": 6,
+   "cand_n": 8,
+   "delta": 0.0,
+   "p_worse": 0.7153846153846154,
+   "p_worse_holm": 1.0,
+   "p_better": 0.7153846153846155,
+   "verdict": "no significant change"
+  }
+ ],
+ "regressed_tasks": [],
+ "improved_tasks": [],
+ "regression": false,
+ "reason": "no statistically significant regression"
+}

@@ -1,0 +1,86 @@
+# Reusable regression gate. Call it from another workflow:
+#
+#   jobs:
+#     gate:
+#       uses: SreenijaPavuluri/agentdiff/.github/workflows/agentdiff-gate.yml@main
+#       with:
+#         harness: examples.demo_pr.agent:make_harness   # module:factory, factory(version) -> harness
+#         k: 8
+#
+# It runs the harness at the PR's base commit (baseline) and at the PR head (candidate) on the
+# same tasks, then runs `agentdiff compare`, which exits 1 only for a statistically significant
+# regression. The HTML report is uploaded as a build artifact either way.
+name: agentdiff-gate
+on:
+  workflow_call:
+    inputs:
+      harness:
+        description: "module:factory that builds a harness for a version"
+        required: true
+        type: string
+      k:
+        description: "runs per task per version"
+        type: number
+        default: 8
+      tasks:
+        description: "comma-separated task ids (default: all)"
+        type: string
+        default: ""
+      alpha:
+        type: number
+        default: 0.05
+      install:
+        description: "extra install command for the agent under test"
+        type: string
+        default: ""
+      agentdiff-spec:
+        description: "pip spec for agentdiff"
+        type: string
+        default: "agentdiff @ git+https://github.com/SreenijaPavuluri/agentdiff.git"
+      budget-usd:
+        type: string
+        default: ""
+    secrets:
+      OPENROUTER_API_KEY:
+        required: false
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          pip install "${{ inputs.agentdiff-spec }}"
+          ${{ inputs.install }}
+      - name: Baseline worktree
+        run: git worktree add ../baseline "${{ github.event.pull_request.base.sha || 'HEAD~1' }}"
+      - name: Run baseline
+        working-directory: ../baseline
+        run: |
+          agentdiff run --harness "${{ inputs.harness }}" --version baseline --k ${{ inputs.k }} \
+            ${{ inputs.tasks && format('--tasks {0}', inputs.tasks) || '' }} \
+            ${{ inputs.budget-usd && format('--budget-usd {0}', inputs.budget-usd) || '' }} \
+            --out "$GITHUB_WORKSPACE/agentdiff-out/baseline.jsonl"
+      - name: Run candidate
+        run: |
+          agentdiff run --harness "${{ inputs.harness }}" --version candidate --k ${{ inputs.k }} --seed0 10000 \
+            ${{ inputs.tasks && format('--tasks {0}', inputs.tasks) || '' }} \
+            ${{ inputs.budget-usd && format('--budget-usd {0}', inputs.budget-usd) || '' }} \
+            --out agentdiff-out/candidate.jsonl
+      - name: Compare (fails only on a significant regression)
+        run: |
+          agentdiff compare --baseline agentdiff-out/baseline.jsonl --candidate agentdiff-out/candidate.jsonl \
+            --alpha ${{ inputs.alpha }} --report agentdiff-out/compare.html --json agentdiff-out/gate.json
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentdiff-report
+          path: agentdiff-out/

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agentdiff compare · baseline → candidate-bad</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fcfcfb; --panel: #ffffff; --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #85847f;
+  --rule: #e4e3de; --grid: #ecebe7; --s1: #2a78d6; --s2: #eb6834;
+  --good: #0c7a3e; --bad: #b42318; --warn: #8a5a00; --add-bg: #e7f5ec; --del-bg: #fdecec; --code-bg: #f5f4f1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1a1a19; --panel: #222220; --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+    --rule: #34332f; --grid: #2c2b28; --s1: #3987e5; --s2: #d95926;
+    --good: #4cc38a; --bad: #ff8a80; --warn: #e0b04a; --add-bg: #173323; --del-bg: #3a1c1c; --code-bg: #2a2926;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1a1a19; --panel: #222220; --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+  --rule: #34332f; --grid: #2c2b28; --s1: #3987e5; --s2: #d95926;
+  --good: #4cc38a; --bad: #ff8a80; --warn: #e0b04a; --add-bg: #173323; --del-bg: #3a1c1c; --code-bg: #2a2926;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 28px 16px 64px; }
+h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 19px; margin: 40px 0 10px; padding-top: 14px; border-top: 1px solid var(--rule); }
+h3 { font-size: 15px; margin: 22px 0 8px; }
+.sub { color: var(--ink-2); margin: 0 0 18px; }
+.muted { color: var(--ink-3); font-size: 13px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.tile { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; }
+.tile .k { color: var(--ink-2); font-size: 13px; }
+.tile .v { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.tile .ci { color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 13px; }
+td.num, th.num { text-align: right; }
+.badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--rule); white-space: nowrap; }
+.badge.good { color: var(--good); } .badge.bad { color: var(--bad); } .badge.warn { color: var(--warn); }
+.chart { width: 100%; max-width: 620px; height: auto; display: block; }
+.chart .grid { stroke: var(--grid); stroke-width: 1; }
+.chart .axis { fill: var(--ink-3); font-size: 11px; }
+.chart .label { fill: var(--ink-2); font-size: 12px; }
+.chart .line { fill: none; stroke-width: 2; }
+.chart .line.s1, .chart .whisker.s1 { stroke: var(--s1); } .chart .line.s2, .chart .whisker.s2 { stroke: var(--s2); }
+.chart .whisker { stroke-width: 1.5; opacity: .6; }
+.chart .dot { stroke: var(--bg); stroke-width: 2; } .chart .dot.s1 { fill: var(--s1); } .chart .dot.s2 { fill: var(--s2); }
+.chart .hit { fill: transparent; } .chart .pt:hover .dot { r: 6; }
+.legend { display: flex; gap: 16px; color: var(--ink-2); font-size: 13px; margin: 4px 0 8px; }
+.legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.side { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 720px) { .side { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px; min-width: 0; }
+.card h4 { margin: 0 0 6px; font-size: 13px; color: var(--ink-2); }
+pre { background: var(--code-bg); border-radius: 8px; padding: 10px; overflow-x: auto; font-size: 12px; line-height: 1.45; margin: 6px 0; max-height: 360px; }
+pre .add { background: var(--add-bg); display: block; } pre .del { background: var(--del-bg); display: block; }
+details { margin: 10px 0; } summary { cursor: pointer; font-weight: 600; }
+code { font-size: 12.5px; }
+.verdict { font-size: 16px; font-weight: 650; }
+</style>
+</head>
+<body>
+<main>
+<h1>agentdiff compare · baseline → candidate-bad</h1>
+<p class="sub">Generated 2026-09-26 01:11 UTC</p>
+<p class="muted">Divergence in this report is computed in regression mode: baseline passing runs vs candidate failing runs.</p>
+
+
+<h2>Regression gate: baseline → candidate-bad</h2>
+<p class="verdict"><span class="badge bad">✕ significant regression · exit 1</span></p>
+<p>overall pass rate dropped -0.312 (stratified exact p=0.00092 &lt; 0.025).</p>
+<div class="tiles">
+  <div class="tile"><div class="k">Δ pass@1 (candidate − baseline)</div><div class="v">-0.312</div><div class="ci">95% CI -0.562 to -0.083</div></div>
+  <div class="tile"><div class="k">p (worse), stratified exact</div><div class="v">9.2e-04</div><div class="ci">threshold α/2 = 0.025</div></div>
+  <div class="tile"><div class="k">Tasks regressed / improved</div><div class="v">0 / 0</div><div class="ci">Holm-adjusted Fisher, α/2</div></div>
+</div>
+<div class="scroll"><table>
+<thead><tr><th>Task</th><th class="num">Baseline</th><th class="num">Candidate</th><th class="num">Δ</th><th class="num">p (worse)</th><th class="num">Holm p</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td><code>t3_sorting</code></td><td class="num">7/8</td><td class="num">2/8</td><td class="num">-0.62</td><td class="num">0.020</td><td class="num">0.101</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t4_encoding</code></td><td class="num">5/8</td><td class="num">0/8</td><td class="num">-0.62</td><td class="num">0.013</td><td class="num">0.077</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t2_nullcheck</code></td><td class="num">5/8</td><td class="num">3/8</td><td class="num">-0.25</td><td class="num">0.310</td><td class="num">1.000</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t1_offbyone</code></td><td class="num">7/8</td><td class="num">6/8</td><td class="num">-0.12</td><td class="num">0.500</td><td class="num">1.000</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t5_unit</code></td><td class="num">7/8</td><td class="num">6/8</td><td class="num">-0.12</td><td class="num">0.500</td><td class="num">1.000</td>
+<td><span class="muted">no significant change</span></td></tr>
+
+<tr><td><code>t6_cache</code></td><td class="num">6/8</td><td class="num">5/8</td><td class="num">-0.12</td><td class="num">0.500</td><td class="num">1.000</td>
+<td><span class="muted">no significant change</span></td></tr>
+</tbody></table></div>
+<p class="muted">Method: exact (convolved hypergeometric). Per-task tests are one-sided Fisher exact with Holm correction; the two families split α so the family-wise false-alarm rate is ≤ α = 0.05.</p>
+
+
+
+<h2>Reliability · candidate-bad</h2>
+<p class="sub">6 tasks × 8 runs</p>
+<div class="tiles">
+  <div class="tile"><div class="k">pass@1</div><div class="v">45.8%</div><div class="ci">95% CI 20.8% to 70.8%</div></div>
+
+  <div class="tile"><div class="k">pass@8</div><div class="v">83.3%</div><div class="ci">95% CI 50.0% to 100.0%</div></div>
+
+  <div class="tile"><div class="k">pass^8</div><div class="v">0.0%</div><div class="ci">95% CI 0.0% to 16.7%</div></div>
+
+  <div class="tile"><div class="k">Flaky / stable-fail tasks</div><div class="v">5 / 1</div><div class="ci">of 6</div></div>
+</div>
+<h3>Reliability decay</h3>
+<div class="legend"><span><i style="background:var(--s1)"></i>pass@k (any of k succeeds)</span><span><i style="background:var(--s2)"></i>pass^k (all k succeed)</span></div>
+<svg viewBox="0 0 560 240" role="img" aria-label="Reliability decay: pass@k and pass^k by k" class="chart"><line x1="44" x2="470" y1="206.0" y2="206.0" class="grid"/><text x="38" y="210.0" class="axis" text-anchor="end">0.00</text><line x1="44" x2="470" y1="158.5" y2="158.5" class="grid"/><text x="38" y="162.5" class="axis" text-anchor="end">0.25</text><line x1="44" x2="470" y1="111.0" y2="111.0" class="grid"/><text x="38" y="115.0" class="axis" text-anchor="end">0.50</text><line x1="44" x2="470" y1="63.5" y2="63.5" class="grid"/><text x="38" y="67.5" class="axis" text-anchor="end">0.75</text><line x1="44" x2="470" y1="16.0" y2="16.0" class="grid"/><text x="38" y="20.0" class="axis" text-anchor="end">1.00</text><text x="44.0" y="228" class="axis" text-anchor="middle">k=1</text><text x="186.0" y="228" class="axis" text-anchor="middle">k=2</text><text x="328.0" y="228" class="axis" text-anchor="middle">k=4</text><text x="470.0" y="228" class="axis" text-anchor="middle">k=8</text><path d="M44.0,118.9 L186.0,81.6 L328.0,56.7 L470.0,47.7" class="line s1"/><g class="pt"><line x1="44.0" x2="44.0" y1="166.4" y2="71.4" class="whisker s1"/><circle cx="44.0" cy="118.9" r="4.5" class="dot s1"/><circle cx="44.0" cy="118.9" r="12" class="hit"><title>pass@k, k=1: 0.458 (95% CI 0.208-0.708)</title></circle></g><g class="pt"><line x1="186.0" x2="186.0" y1="144.9" y2="35.2" class="whisker s1"/><circle cx="186.0" cy="81.6" r="4.5" class="dot s1"/><circle cx="186.0" cy="81.6" r="12" class="hit"><title>pass@k, k=2: 0.655 (95% CI 0.321-0.899)</title></circle></g><g class="pt"><line x1="328.0" x2="328.0" y1="126.8" y2="17.4" class="whisker s1"/><circle cx="328.0" cy="56.7" r="4.5" class="dot s1"/><circle cx="328.0" cy="56.7" r="12" class="hit"><title>pass@k, k=4: 0.786 (95% CI 0.417-0.993)</title></circle></g><g class="pt"><line x1="470.0" x2="470.0" y1="111.0" y2="16.0" class="whisker s1"/><circle cx="470.0" cy="47.7" r="4.5" class="dot s1"/><circle cx="470.0" cy="47.7" r="12" class="hit"><title>pass@k, k=8: 0.833 (95% CI 0.500-1.000)</title></circle></g><text x="480.0" y="51.7" class="label">pass@k</text><path d="M44.0,118.9 L186.0,156.2 L328.0,190.2 L470.0,206.0" class="line s2"/><g class="pt"><line x1="44.0" x2="44.0" y1="166.4" y2="71.4" class="whisker s2"/><circle cx="44.0" cy="118.9" r="4.5" class="dot s2"/><circle cx="44.0" cy="118.9" r="12" class="hit"><title>pass^k, k=1: 0.458 (95% CI 0.208-0.708)</title></circle></g><g class="pt"><line x1="186.0" x2="186.0" y1="191.3" y2="104.2" class="whisker s2"/><circle cx="186.0" cy="156.2" r="4.5" class="dot s2"/><circle cx="186.0" cy="156.2" r="12" class="hit"><title>pass^k, k=2: 0.262 (95% CI 0.077-0.536)</title></circle></g><g class="pt"><line x1="328.0" x2="328.0" y1="205.1" y2="135.9" class="whisker s2"/><circle cx="328.0" cy="190.2" r="4.5" class="dot s2"/><circle cx="328.0" cy="190.2" r="12" class="hit"><title>pass^k, k=4: 0.083 (95% CI 0.005-0.369)</title></circle></g><g class="pt"><line x1="470.0" x2="470.0" y1="206.0" y2="174.3" class="whisker s2"/><circle cx="470.0" cy="206.0" r="4.5" class="dot s2"/><circle cx="470.0" cy="206.0" r="12" class="hit"><title>pass^k, k=8: 0.000 (95% CI 0.000-0.167)</title></circle></g><text x="480.0" y="210.0" class="label">pass^k</text></svg>
+<p class="muted">Whiskers: 95% two-stage bootstrap CIs (tasks, then runs within task). Hover a point for values.</p>
+
+<h3>Flaky tasks, ranked by suite pass^8 gain if fixed</h3>
+<div class="scroll"><table>
+<thead><tr><th>#</th><th>Task</th><th class="num">Passes</th><th class="num">pass@1 (95% CI)</th><th class="num">pass^8</th><th class="num">Gain if fixed</th><th>Divergence</th></tr></thead><tbody>
+
+<tr><td>1</td><td><code>t1_offbyone</code></td><td class="num">6/8</td>
+<td class="num">75.0% (34.9%–96.8%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><a href="#div-t1_offbyone"><code>coder:llm:llm#1</code></a></td></tr>
+
+<tr><td>2</td><td><code>t2_nullcheck</code></td><td class="num">3/8</td>
+<td class="num">37.5% (8.5%–75.5%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><a href="#div-t2_nullcheck"><code>planner:llm:llm#1</code></a></td></tr>
+
+<tr><td>3</td><td><code>t3_sorting</code></td><td class="num">2/8</td>
+<td class="num">25.0% (3.2%–65.1%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><a href="#div-t3_sorting"><code>coder:tool:read_file#1</code></a></td></tr>
+
+<tr><td>4</td><td><code>t5_unit</code></td><td class="num">6/8</td>
+<td class="num">75.0% (34.9%–96.8%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><a href="#div-t5_unit"><code>coder:llm:llm#1</code></a></td></tr>
+
+<tr><td>5</td><td><code>t6_cache</code></td><td class="num">5/8</td>
+<td class="num">62.5% (24.5%–91.5%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.167</td>
+<td><a href="#div-t6_cache"><code>planner:llm:llm#1</code></a></td></tr>
+</tbody></table></div>
+<p>Stable-fail (broken, not flaky): <code>t4_encoding</code></p>
+
+<details><summary>All tasks (table view)</summary><div class="scroll"><table>
+<thead><tr><th>Task</th><th>Label</th><th class="num">Passes</th><th class="num">pass@1</th><th class="num">pass@2</th><th class="num">pass^2</th><th class="num">pass@4</th><th class="num">pass^4</th><th class="num">pass@8</th><th class="num">pass^8</th></tr></thead><tbody>
+<tr><td><code>t1_offbyone</code></td><td>flaky</td><td class="num">6/8</td>
+<td class="num">0.750</td><td class="num">0.964</td><td class="num">0.536</td><td class="num">1.000</td><td class="num">0.214</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t2_nullcheck</code></td><td>flaky</td><td class="num">3/8</td>
+<td class="num">0.375</td><td class="num">0.643</td><td class="num">0.107</td><td class="num">0.929</td><td class="num">0.000</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t3_sorting</code></td><td>flaky</td><td class="num">2/8</td>
+<td class="num">0.250</td><td class="num">0.464</td><td class="num">0.036</td><td class="num">0.786</td><td class="num">0.000</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t4_encoding</code></td><td>stable-fail</td><td class="num">0/8</td>
+<td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td></tr><tr><td><code>t5_unit</code></td><td>flaky</td><td class="num">6/8</td>
+<td class="num">0.750</td><td class="num">0.964</td><td class="num">0.536</td><td class="num">1.000</td><td class="num">0.214</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t6_cache</code></td><td>flaky</td><td class="num">5/8</td>
+<td class="num">0.625</td><td class="num">0.893</td><td class="num">0.357</td><td class="num">1.000</td><td class="num">0.071</td><td class="num">1.000</td><td class="num">0.000</td></tr>
+</tbody></table></div></details>
+
+
+
+<h2>Recurring failure modes</h2>
+<p class="muted">Clusters are formed deterministically from divergence signatures; names are templates.</p>
+<div class="scroll"><table><thead><tr><th>Mode</th><th class="num">Tasks</th><th>Step</th><th>Kind</th><th>Tasks</th></tr></thead><tbody>
+<tr><td>decision divergence at planner:llm:llm</td><td class="num">5</td><td><code>planner:llm:llm</code></td><td>decision</td><td><code>t4_encoding</code>, <code>t2_nullcheck</code>, <code>t1_offbyone</code>, <code>t5_unit</code>, <code>t6_cache</code></td></tr><tr><td>decision divergence at coder:tool:read_file</td><td class="num">1</td><td><code>coder:tool:read_file</code></td><td>decision</td><td><code>t3_sorting</code></td></tr>
+</tbody></table></div>
+
+
+
+<h2>Where passing and failing runs split</h2>
+
+<details id="div-t3_sorting" open>
+<summary><code>t3_sorting</code> · <code>coder:tool:read_file#1</code> (decision) · 7 passing vs 6 failing (regression)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.463 (failing) vs 0.000 (passing), permutation p = 5.8e-04; 16.7% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>coder:tool:read_file#1</code>, <code>coder:llm:llm#1</code>, <code>coder:tool:run_tests#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run b9384bb670f5)</h4><code>coder:tool:read_file#1</code><pre>{
+ "path": "order.py"
+}</pre></div>
+<div class="card"><h4>Failing (run 18ae96968f01)</h4><code>coder:tool:read_file#1</code><pre>{
+ "path": "io.py"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;path&#34;: &#34;order.py&#34;</span><span class="add">+ &#34;path&#34;: &#34;io.py&#34;</span> }
+</pre>
+<h4 class="muted">Observation diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+<span class="del">-# order.py for t3_sorting</span><span class="add">+# io.py for t3_sorting</span> def f0(x):
+     return x + 0
+@@ -6,6 +6,4 @@
+ def f2(x):
+     return x + 2
+<span class="del">-def buggy(xs):</span><span class="del">-    return xs[1:]  # BUG: drops first element</span> def f3(x):
+     return x + 3
+</pre>
+
+</details>
+
+<details id="div-t4_encoding" open>
+<summary><code>t4_encoding</code> · <code>planner:llm:llm#1</code> (decision) · 5 passing vs 8 failing (regression)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.500 (failing) vs 0.000 (passing), permutation p = 7.8e-04; 100.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>planner:llm:llm#1</code>, <code>coder:tool:read_file#1</code>, <code>coder:llm:llm#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run 847a413ff36f)</h4><code>planner:llm:llm#1</code><pre>open text.py</pre></div>
+<div class="card"><h4>Failing (run 40bdefbcffb0)</h4><code>planner:llm:llm#1</code><pre>open utils.py</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1 +1 @@
+<span class="del">-open text.py</span><span class="add">+open utils.py</span></pre>
+
+</details>
+
+<details id="div-t2_nullcheck" open>
+<summary><code>t2_nullcheck</code> · <code>planner:llm:llm#1</code> (decision) · 5 passing vs 5 failing (regression)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.500 (failing) vs 0.000 (passing), permutation p = 0.004; 100.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>planner:llm:llm#1</code>, <code>coder:tool:read_file#1</code>, <code>coder:llm:llm#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run d05ec53d1660)</h4><code>planner:llm:llm#1</code><pre>open parse.py</pre></div>
+<div class="card"><h4>Failing (run 6beee9bf53d5)</h4><code>planner:llm:llm#1</code><pre>open fmt.py</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1 +1 @@
+<span class="del">-open parse.py</span><span class="add">+open fmt.py</span></pre>
+
+</details>
+
+<details id="div-t1_offbyone" >
+<summary><code>t1_offbyone</code> · <code>coder:llm:llm#1</code> (decision) · 7 passing vs 2 failing (regression)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.600 (failing) vs 0.000 (passing), permutation p = 0.028; 100.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>coder:llm:llm#1</code>, <code>coder:tool:run_tests#1</code>, <code>coder:tool:read_file#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run dbc7a3f6cdd3)</h4><code>coder:llm:llm#1</code><pre>return xs  # fixed</pre></div>
+<div class="card"><h4>Failing (run 77397a4f2f6a)</h4><code>coder:llm:llm#1</code><pre>return sorted(xs)  # guess in calc.py</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1 +1 @@
+<span class="del">-return xs  # fixed</span><span class="add">+return sorted(xs)  # guess in calc.py</span></pre>
+
+</details>
+
+<details id="div-t5_unit" >
+<summary><code>t5_unit</code> · <code>coder:llm:llm#1</code> (decision) · 7 passing vs 2 failing (regression)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.600 (failing) vs 0.000 (passing), permutation p = 0.028; 100.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>coder:llm:llm#1</code>, <code>coder:tool:run_tests#1</code>, <code>coder:tool:read_file#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run 884b156c5bf6)</h4><code>coder:llm:llm#1</code><pre>return xs  # fixed</pre></div>
+<div class="card"><h4>Failing (run bd650b05d2b4)</h4><code>coder:llm:llm#1</code><pre>return sorted(xs)  # guess in units.py</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1 +1 @@
+<span class="del">-return xs  # fixed</span><span class="add">+return sorted(xs)  # guess in units.py</span></pre>
+
+</details>
+
+<details id="div-t6_cache" >
+<summary><code>t6_cache</code> · <code>planner:llm:llm#1</code> (decision) · 6 passing vs 3 failing (regression)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.500 (failing) vs 0.000 (passing), permutation p = 0.012; 100.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>planner:llm:llm#1</code>, <code>coder:tool:read_file#1</code>, <code>coder:llm:llm#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run 2a8c8349ee4a)</h4><code>planner:llm:llm#1</code><pre>open cache.py</pre></div>
+<div class="card"><h4>Failing (run f15b40ae75d0)</h4><code>planner:llm:llm#1</code><pre>open store.py</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1 +1 @@
+<span class="del">-open cache.py</span><span class="add">+open store.py</span></pre>
+
+</details>
+
+
+
+<p class="muted" style="margin-top:40px">agentdiff · statistics: Clopper–Pearson, two-stage bootstrap, stratified exact (CMH-conditional) test, Fisher + Holm, Newcombe method 10.</p>
+</main>
+</body>
+</html>
