@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentdiff"
+version = "0.1.0"
+description = "Find out why your agent is flaky: reliability with CIs, pass/fail divergence, replay confirmation, statistical CI gating."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Sreenija Pavuluri" }]
+keywords = ["llm-agents", "agent-evaluation", "reliability", "observability", "mlops"]
+dependencies = [
+    "pydantic>=2.7",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "typer>=0.12",
+    "jinja2>=3.1",
+    "httpx>=0.27",
+    "rich>=13",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+codeverify = ["codeverify @ git+https://github.com/SreenijaPavuluri/code-verify-agents.git"]
+
+[project.scripts]
+agentdiff = "agentdiff.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+agentdiff = ["report/*.j2"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "UP", "SIM"]
+ignore = ["E501"]
