@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ b.title }}</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fcfcfb; --panel: #ffffff; --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #85847f;
+  --rule: #e4e3de; --grid: #ecebe7; --s1: #2a78d6; --s2: #eb6834;
+  --good: #0c7a3e; --bad: #b42318; --warn: #8a5a00; --add-bg: #e7f5ec; --del-bg: #fdecec; --code-bg: #f5f4f1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1a1a19; --panel: #222220; --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+    --rule: #34332f; --grid: #2c2b28; --s1: #3987e5; --s2: #d95926;
+    --good: #4cc38a; --bad: #ff8a80; --warn: #e0b04a; --add-bg: #173323; --del-bg: #3a1c1c; --code-bg: #2a2926;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1a1a19; --panel: #222220; --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+  --rule: #34332f; --grid: #2c2b28; --s1: #3987e5; --s2: #d95926;
+  --good: #4cc38a; --bad: #ff8a80; --warn: #e0b04a; --add-bg: #173323; --del-bg: #3a1c1c; --code-bg: #2a2926;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 28px 16px 64px; }
+h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 19px; margin: 40px 0 10px; padding-top: 14px; border-top: 1px solid var(--rule); }
+h3 { font-size: 15px; margin: 22px 0 8px; }
+.sub { color: var(--ink-2); margin: 0 0 18px; }
+.muted { color: var(--ink-3); font-size: 13px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.tile { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; }
+.tile .k { color: var(--ink-2); font-size: 13px; }
+.tile .v { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.tile .ci { color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 13px; }
+td.num, th.num { text-align: right; }
+.badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--rule); white-space: nowrap; }
+.badge.good { color: var(--good); } .badge.bad { color: var(--bad); } .badge.warn { color: var(--warn); }
+.chart { width: 100%; max-width: 620px; height: auto; display: block; }
+.chart .grid { stroke: var(--grid); stroke-width: 1; }
+.chart .axis { fill: var(--ink-3); font-size: 11px; }
+.chart .label { fill: var(--ink-2); font-size: 12px; }
+.chart .line { fill: none; stroke-width: 2; }
+.chart .line.s1, .chart .whisker.s1 { stroke: var(--s1); } .chart .line.s2, .chart .whisker.s2 { stroke: var(--s2); }
+.chart .whisker { stroke-width: 1.5; opacity: .6; }
+.chart .dot { stroke: var(--bg); stroke-width: 2; } .chart .dot.s1 { fill: var(--s1); } .chart .dot.s2 { fill: var(--s2); }
+.chart .hit { fill: transparent; } .chart .pt:hover .dot { r: 6; }
+.legend { display: flex; gap: 16px; color: var(--ink-2); font-size: 13px; margin: 4px 0 8px; }
+.legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.side { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 720px) { .side { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px; min-width: 0; }
+.card h4 { margin: 0 0 6px; font-size: 13px; color: var(--ink-2); }
+pre { background: var(--code-bg); border-radius: 8px; padding: 10px; overflow-x: auto; font-size: 12px; line-height: 1.45; margin: 6px 0; max-height: 360px; }
+pre .add { background: var(--add-bg); display: block; } pre .del { background: var(--del-bg); display: block; }
+details { margin: 10px 0; } summary { cursor: pointer; font-weight: 600; }
+code { font-size: 12.5px; }
+.verdict { font-size: 16px; font-weight: 650; }
+</style>
+</head>
+<body>
+<main>
+<h1>{{ b.title }}</h1>
+<p class="sub">Generated {{ b.generated_at }}{% if b.cost_usd %} · API cost ${{ "%.4f"|format(b.cost_usd) }}{% endif %}</p>
+{% for n in b.notes %}<p class="muted">{{ n }}</p>{% endfor %}
+
+{% if b.gate %}{% set g = b.gate %}
+<h2>Regression gate: {{ g.baseline }} → {{ g.candidate }}</h2>
+<p class="verdict">{% if g.regression %}<span class="badge bad">✕ significant regression · exit 1</span>{% else %}<span class="badge good">✓ no significant regression · exit 0</span>{% endif %}</p>
+<p>{{ g.reason }}.</p>
+<div class="tiles">
+  <div class="tile"><div class="k">Δ pass@1 (candidate − baseline)</div><div class="v">{{ "%+.3f"|format(g.overall_delta) }}</div><div class="ci">95% CI {{ g.overall_ci[0]|f3 }} to {{ g.overall_ci[1]|f3 }}</div></div>
+  <div class="tile"><div class="k">p (worse), stratified exact</div><div class="v">{{ g.overall_p_worse|pv }}</div><div class="ci">threshold α/2 = {{ g.alpha / 2 }}</div></div>
+  <div class="tile"><div class="k">Tasks regressed / improved</div><div class="v">{{ g.regressed_tasks|length }} / {{ g.improved_tasks|length }}</div><div class="ci">Holm-adjusted Fisher, α/2</div></div>
+</div>
+<div class="scroll"><table>
+<thead><tr><th>Task</th><th class="num">Baseline</th><th class="num">Candidate</th><th class="num">Δ</th><th class="num">p (worse)</th><th class="num">Holm p</th><th>Verdict</th></tr></thead>
+<tbody>{% for t in g.tasks|sort(attribute="delta") %}
+<tr><td><code>{{ t.task_id }}</code></td><td class="num">{{ t.base_pass }}/{{ t.base_n }}</td><td class="num">{{ t.cand_pass }}/{{ t.cand_n }}</td><td class="num">{{ "%+.2f"|format(t.delta) }}</td><td class="num">{{ t.p_worse|pv }}</td><td class="num">{{ t.p_worse_holm|pv }}</td>
+<td>{% if t.verdict == "regressed" %}<span class="badge bad">✕ regressed</span>{% elif t.verdict == "improved" %}<span class="badge good">↑ improved</span>{% else %}<span class="muted">no significant change</span>{% endif %}</td></tr>
+{% endfor %}</tbody></table></div>
+<p class="muted">Method: {{ g.overall_method }}. Per-task tests are one-sided Fisher exact with Holm correction; the two families split α so the family-wise false-alarm rate is ≤ α = {{ g.alpha }}.</p>
+{% endif %}
+
+{% if b.reliability %}{% set r = b.reliability %}
+<h2>Reliability · {{ r.agent_version }}</h2>
+<p class="sub">{{ r.n_tasks }} tasks × {{ r.runs_per_task }} runs{% if r.infra_errors %} · {{ r.infra_errors }} infrastructure errors excluded{% endif %}</p>
+<div class="tiles">{% for key in ["pass@1", "pass@" ~ r.ks[-1], "pass^" ~ r.ks[-1]] %}{% if key in r.metrics %}{% set e = r.metrics[key] %}
+  <div class="tile"><div class="k">{{ key }}</div><div class="v">{{ e.value|pct }}</div><div class="ci">95% CI {{ e.lo|pct }} to {{ e.hi|pct }}</div></div>
+{% endif %}{% endfor %}
+  <div class="tile"><div class="k">Flaky / stable-fail tasks</div><div class="v">{{ r.flaky_ranking|length }} / {{ r.stable_fail|length }}</div><div class="ci">of {{ r.n_tasks }}</div></div>
+</div>
+<h3>Reliability decay</h3>
+<div class="legend"><span><i style="background:var(--s1)"></i>pass@k (any of k succeeds)</span><span><i style="background:var(--s2)"></i>pass^k (all k succeed)</span></div>
+{{ decay|safe }}
+<p class="muted">Whiskers: 95% two-stage bootstrap CIs (tasks, then runs within task). Hover a point for values.</p>
+
+<h3>Flaky tasks, ranked by suite pass^{{ r.ks[-1] }} gain if fixed</h3>
+{% if r.flaky_ranking %}<div class="scroll"><table>
+<thead><tr><th>#</th><th>Task</th><th class="num">Passes</th><th class="num">pass@1 (95% CI)</th><th class="num">pass^{{ r.ks[-1] }}</th><th class="num">Gain if fixed</th><th>Divergence</th></tr></thead><tbody>
+{% for tid in r.flaky_ranking %}{% set t = (r.tasks|selectattr("task_id", "equalto", tid)|first) %}{% set d = div_by_task.get(tid) %}
+<tr><td>{{ loop.index }}</td><td><code>{{ tid }}</code></td><td class="num">{{ t.c }}/{{ t.n }}</td>
+<td class="num">{{ t.metrics["pass@1"].value|pct }} ({{ t.metrics["pass@1"].lo|pct }}–{{ t.metrics["pass@1"].hi|pct }})</td>
+<td class="num">{{ t.metrics["pass^" ~ r.ks[-1]].value|f3 if ("pass^" ~ r.ks[-1]) in t.metrics else "-" }}</td>
+<td class="num">+{{ "%.3f"|format(t.gain_pass_hat_k) }}</td>
+<td>{% if d and d.predicted_labels %}<a href="#div-{{ tid }}"><code>{{ d.predicted_labels[0] }}</code></a>{% if d.confidence == "low" %} <span class="badge warn">low confidence</span>{% endif %}{% else %}<span class="muted">-</span>{% endif %}</td></tr>
+{% endfor %}</tbody></table></div>{% else %}<p class="muted">No flaky tasks observed. With {{ r.runs_per_task }} runs, a task with true pass rate 0.9 still looks stable-pass with probability {{ "%.2f"|format(0.9 ** r.runs_per_task) }}.</p>{% endif %}
+{% if r.stable_fail %}<p>Stable-fail (broken, not flaky): {% for t in r.stable_fail %}<code>{{ t }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+
+<details><summary>All tasks (table view)</summary><div class="scroll"><table>
+<thead><tr><th>Task</th><th>Label</th><th class="num">Passes</th>{% for k in r.ks %}<th class="num">pass@{{ k }}</th>{% if k > 1 %}<th class="num">pass^{{ k }}</th>{% endif %}{% endfor %}</tr></thead><tbody>
+{% for t in r.tasks %}<tr><td><code>{{ t.task_id }}</code></td><td>{{ t.label }}</td><td class="num">{{ t.c }}/{{ t.n }}</td>
+{% for k in r.ks %}<td class="num">{{ t.metrics["pass@" ~ k].value|f3 }}</td>{% if k > 1 %}<td class="num">{{ t.metrics["pass^" ~ k].value|f3 }}</td>{% endif %}{% endfor %}</tr>{% endfor %}
+</tbody></table></div></details>
+{% endif %}
+
+{% if b.failure_modes %}
+<h2>Recurring failure modes</h2>
+<p class="muted">Clusters are formed deterministically from divergence signatures; names are {% if b.failure_modes[0].named_by == "template" %}templates{% else %}suggested by {{ b.failure_modes[0].named_by }} (naming only){% endif %}.</p>
+<div class="scroll"><table><thead><tr><th>Mode</th><th class="num">Tasks</th><th>Step</th><th>Kind</th><th>Tasks</th></tr></thead><tbody>
+{% for m in b.failure_modes %}<tr><td>{{ m.name }}</td><td class="num">{{ m.members|length }}</td><td><code>{{ m.step_labels[0] }}</code></td><td>{{ m.deviation_types[0] }}</td><td>{% for t in m.members %}<code>{{ t }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</td></tr>{% endfor %}
+</tbody></table></div>
+{% endif %}
+
+{% if b.divergences %}
+<h2>Where passing and failing runs split</h2>
+{% for d in b.divergences %}{% set c = d.columns[d.chosen] if d.chosen is not none else none %}
+<details id="div-{{ d.task_id }}" {% if loop.index <= 3 %}open{% endif %}>
+<summary><code>{{ d.task_id }}</code> · {% if c %}<code>{{ d.predicted_labels[0] }}</code> ({{ c.deviation }}){% else %}no divergence found{% endif %} · {{ d.n_pass }} passing vs {{ d.n_fail }} failing ({{ d.mode }}){% if d.confidence == "low" %} <span class="badge warn">low confidence</span>{% endif %}</summary>
+{% if c %}
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance {{ c.mean_d_fail|f3 }} (failing) vs {{ c.mean_d_pass|f3 }} (passing), permutation p = {{ c.p|pv }}; {{ c.frac_fail_deviating|pct }} of failing and {{ c.frac_pass_deviating|pct }} of passing runs deviate here. Top-3 candidates: {% for l in d.predicted_labels %}<code>{{ l }}</code>{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+{% if d.evidence %}<div class="side">
+<div class="card"><h4>Passing (reference run {{ d.evidence.ref_run }})</h4>{% if d.evidence.ref_step %}<code>{{ d.evidence.ref_step.label }}</code><pre>{{ d.evidence.ref_step.decision|tojson(indent=1) if d.evidence.ref_step.decision is not string else d.evidence.ref_step.decision }}</pre>{% else %}<p class="muted">(no step here)</p>{% endif %}</div>
+<div class="card"><h4>Failing (run {{ d.evidence.fail_run }})</h4>{% if d.evidence.fail_step %}<code>{{ d.evidence.fail_step.label }}</code>{% if d.evidence.fail_step.error %} <span class="badge bad">{{ d.evidence.fail_step.error }}</span>{% endif %}<pre>{{ d.evidence.fail_step.decision|tojson(indent=1) if d.evidence.fail_step.decision is not string else d.evidence.fail_step.decision }}</pre>{% else %}<p class="muted">(step missing in failing run)</p>{% endif %}</div>
+</div>
+{% for title, diff in [("Decision diff", d.evidence.decision_diff), ("Observation diff", d.evidence.observation_diff)] %}{% if diff %}
+<h4 class="muted">{{ title }}</h4><pre>{% for line in diff.splitlines() %}{% if line.startswith("+") and not line.startswith("+++") %}<span class="add">{{ line }}</span>{% elif line.startswith("-") and not line.startswith("---") %}<span class="del">{{ line }}</span>{% else %}{{ line }}
+{% endif %}{% endfor %}</pre>{% endif %}{% endfor %}
+{% endif %}{% endif %}
+</details>
+{% endfor %}{% endif %}
+
+{% if b.replays %}
+<h2>Replay confirmation</h2>
+<p class="muted">Fork a failing run at the candidate step with the prefix replayed from cache. The <b>resample</b> arm re-draws that step live and the <b>keep</b> arm reuses the recorded failing step; everything after runs live. Confirmed causal iff the Newcombe 95% CI of Δ = pass(resample) − pass(keep) excludes 0.</p>
+<div class="scroll"><table><thead><tr><th>Task</th><th>Candidate step</th><th class="num">Resample</th><th class="num">Keep</th><th class="num">Δ (95% CI)</th><th>Status</th><th class="num">Forks</th><th class="num">Cost</th><th class="num">Time</th></tr></thead><tbody>
+{% for rep in b.replays %}{% for t in rep.tests %}<tr><td><code>{{ rep.task_id }}</code></td><td><code>{{ t.label }}</code></td>
+<td class="num">{{ t.resample.passed }}/{{ t.resample.n }}</td><td class="num">{{ t.keep.passed }}/{{ t.keep.n }}</td>
+<td class="num">{% if t.delta is not none %}{{ "%+.2f"|format(t.delta) }} ({{ "%+.2f"|format(t.lo) }}, {{ "%+.2f"|format(t.hi) }}){% else %}-{% endif %}</td>
+<td>{% if t.status == "confirmed" %}<span class="badge good">✓ confirmed</span>{% elif t.status == "not-confirmed" %}<span class="muted">not confirmed</span>{% else %}<span class="badge warn">{{ t.status }}</span>{% endif %}</td>
+<td class="num">{{ t.resample.n + t.keep.n }}</td><td class="num">${{ "%.4f"|format(t.cost_usd) }}</td><td class="num">{{ "%.0f"|format(t.wall_s) }}s</td></tr>{% endfor %}{% endfor %}
+</tbody></table></div>
+{% endif %}
+<p class="muted" style="margin-top:40px">agentdiff · statistics: Clopper–Pearson, two-stage bootstrap, stratified exact (CMH-conditional) test, Fisher + Holm, Newcombe method 10.</p>
+</main>
+</body>
+</html>
