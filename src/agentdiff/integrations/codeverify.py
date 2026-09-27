@@ -108,6 +108,9 @@ class Fault:
     def patch_tool(self, node: str, name: str, occurrence: int, result: Any, rng: random.Random) -> Any:
         return result
 
+    def patch_response(self, node: str, occurrence: int, text: str, rng: random.Random) -> str:
+        return text
+
 
 class _TapedLLM:
     def __init__(self, tape: Tape, models: dict[str, Model], default: str, fault: Fault, seed: int,
@@ -116,6 +119,7 @@ class _TapedLLM:
         self.seed, self.temperature = seed, temperature
         self.calls: Counter[str] = Counter()
         self.fired: list[int] = []
+        self.rng = random.Random(seed)
 
     def complete(self, system: str, user: str) -> LLMResponse:
         node = node_of(system)
@@ -132,8 +136,15 @@ class _TapedLLM:
         call_seed = (self.seed * 1_000_003 + occ * 7919 + hash(node) % 997) % (2**31)
         request = {"system": system, "user": user, "model": model_name, "temperature": temp}
 
+        index = len(self.tape.steps)
+
         def call() -> LLMReply:
-            return self.models[model_name](system, user, temperature=temp, seed=call_seed)
+            reply = self.models[model_name](system, user, temperature=temp, seed=call_seed)
+            text = self.fault.patch_response(node, occ, reply.text, self.rng)
+            if text != reply.text:
+                self.fired.append(index)
+                reply.text = text
+            return reply
 
         reply = self.tape.llm(node, request, call, view=lambda text: llm_view(node, text))
         return LLMResponse(text=reply.text, model=reply.model, input_tokens=reply.tokens_in,
@@ -201,6 +212,7 @@ class CodeVerifyHarness:
         item = self._items[task_id]
         env_rng = random.Random(f"env-{self.fault.id}-{seed}")
         llm = _TapedLLM(tape, self.models, self.default_model, self.fault, seed, self.temperature)
+        llm.rng = random.Random(f"llm-env-{self.fault.id}-{seed}")
         tools = _TapedTools(SubprocessSandbox(timeout_s=self.settings.sandbox_timeout_s), tape, self.fault, env_rng)
         graph = build_graph(self.settings, llm=llm, tools=tools)
         try:

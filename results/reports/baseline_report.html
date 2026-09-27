@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agentdiff · code-verify-agents baseline (qwen2.5-coder:1.5b, 10 tasks x 16 runs)</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fcfcfb; --panel: #ffffff; --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #85847f;
+  --rule: #e4e3de; --grid: #ecebe7; --s1: #2a78d6; --s2: #eb6834;
+  --good: #0c7a3e; --bad: #b42318; --warn: #8a5a00; --add-bg: #e7f5ec; --del-bg: #fdecec; --code-bg: #f5f4f1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1a1a19; --panel: #222220; --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+    --rule: #34332f; --grid: #2c2b28; --s1: #3987e5; --s2: #d95926;
+    --good: #4cc38a; --bad: #ff8a80; --warn: #e0b04a; --add-bg: #173323; --del-bg: #3a1c1c; --code-bg: #2a2926;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1a1a19; --panel: #222220; --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8f8e86;
+  --rule: #34332f; --grid: #2c2b28; --s1: #3987e5; --s2: #d95926;
+  --good: #4cc38a; --bad: #ff8a80; --warn: #e0b04a; --add-bg: #173323; --del-bg: #3a1c1c; --code-bg: #2a2926;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 28px 16px 64px; }
+h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 19px; margin: 40px 0 10px; padding-top: 14px; border-top: 1px solid var(--rule); }
+h3 { font-size: 15px; margin: 22px 0 8px; }
+.sub { color: var(--ink-2); margin: 0 0 18px; }
+.muted { color: var(--ink-3); font-size: 13px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.tile { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; }
+.tile .k { color: var(--ink-2); font-size: 13px; }
+.tile .v { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.tile .ci { color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 14px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 13px; }
+td.num, th.num { text-align: right; }
+.badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--rule); white-space: nowrap; }
+.badge.good { color: var(--good); } .badge.bad { color: var(--bad); } .badge.warn { color: var(--warn); }
+.chart { width: 100%; max-width: 620px; height: auto; display: block; }
+.chart .grid { stroke: var(--grid); stroke-width: 1; }
+.chart .axis { fill: var(--ink-3); font-size: 11px; }
+.chart .label { fill: var(--ink-2); font-size: 12px; }
+.chart .line { fill: none; stroke-width: 2; }
+.chart .line.s1, .chart .whisker.s1 { stroke: var(--s1); } .chart .line.s2, .chart .whisker.s2 { stroke: var(--s2); }
+.chart .whisker { stroke-width: 1.5; opacity: .6; }
+.chart .dot { stroke: var(--bg); stroke-width: 2; } .chart .dot.s1 { fill: var(--s1); } .chart .dot.s2 { fill: var(--s2); }
+.chart .hit { fill: transparent; } .chart .pt:hover .dot { r: 6; }
+.legend { display: flex; gap: 16px; color: var(--ink-2); font-size: 13px; margin: 4px 0 8px; }
+.legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.side { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 720px) { .side { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px; min-width: 0; }
+.card h4 { margin: 0 0 6px; font-size: 13px; color: var(--ink-2); }
+pre { background: var(--code-bg); border-radius: 8px; padding: 10px; overflow-x: auto; font-size: 12px; line-height: 1.45; margin: 6px 0; max-height: 360px; }
+pre .add { background: var(--add-bg); display: block; } pre .del { background: var(--del-bg); display: block; }
+details { margin: 10px 0; } summary { cursor: pointer; font-weight: 600; }
+code { font-size: 12.5px; }
+.verdict { font-size: 16px; font-weight: 650; }
+</style>
+</head>
+<body>
+<main>
+<h1>agentdiff · code-verify-agents baseline (qwen2.5-coder:1.5b, 10 tasks x 16 runs)</h1>
+<p class="sub">Generated 2026-09-27 05:33 UTC</p>
+
+
+
+
+
+<h2>Reliability · baseline</h2>
+<p class="sub">10 tasks × 16 runs</p>
+<div class="tiles">
+  <div class="tile"><div class="k">pass@1</div><div class="v">46.9%</div><div class="ci">95% CI 30.6% to 63.7%</div></div>
+
+  <div class="tile"><div class="k">pass@16</div><div class="v">90.0%</div><div class="ci">95% CI 70.0% to 100.0%</div></div>
+
+  <div class="tile"><div class="k">pass^16</div><div class="v">0.0%</div><div class="ci">95% CI 0.0% to 10.0%</div></div>
+
+  <div class="tile"><div class="k">Flaky / stable-fail tasks</div><div class="v">9 / 1</div><div class="ci">of 10</div></div>
+</div>
+<h3>Reliability decay</h3>
+<div class="legend"><span><i style="background:var(--s1)"></i>pass@k (any of k succeeds)</span><span><i style="background:var(--s2)"></i>pass^k (all k succeed)</span></div>
+<svg viewBox="0 0 560 240" role="img" aria-label="Reliability decay: pass@k and pass^k by k" class="chart"><line x1="44" x2="470" y1="206.0" y2="206.0" class="grid"/><text x="38" y="210.0" class="axis" text-anchor="end">0.00</text><line x1="44" x2="470" y1="158.5" y2="158.5" class="grid"/><text x="38" y="162.5" class="axis" text-anchor="end">0.25</text><line x1="44" x2="470" y1="111.0" y2="111.0" class="grid"/><text x="38" y="115.0" class="axis" text-anchor="end">0.50</text><line x1="44" x2="470" y1="63.5" y2="63.5" class="grid"/><text x="38" y="67.5" class="axis" text-anchor="end">0.75</text><line x1="44" x2="470" y1="16.0" y2="16.0" class="grid"/><text x="38" y="20.0" class="axis" text-anchor="end">1.00</text><text x="44.0" y="228" class="axis" text-anchor="middle">k=1</text><text x="150.5" y="228" class="axis" text-anchor="middle">k=2</text><text x="257.0" y="228" class="axis" text-anchor="middle">k=4</text><text x="363.5" y="228" class="axis" text-anchor="middle">k=8</text><text x="470.0" y="228" class="axis" text-anchor="middle">k=16</text><path d="M44.0,116.9 L150.5,79.2 L257.0,51.5 L363.5,39.5 L470.0,35.0" class="line s1"/><g class="pt"><line x1="44.0" x2="44.0" y1="147.8" y2="84.9" class="whisker s1"/><circle cx="44.0" cy="116.9" r="4.5" class="dot s1"/><circle cx="44.0" cy="116.9" r="12" class="hit"><title>pass@k, k=1: 0.469 (95% CI 0.306-0.637)</title></circle></g><g class="pt"><line x1="150.5" x2="150.5" y1="119.2" y2="47.5" class="whisker s1"/><circle cx="150.5" cy="79.2" r="4.5" class="dot s1"/><circle cx="150.5" cy="79.2" r="12" class="hit"><title>pass@k, k=2: 0.667 (95% CI 0.457-0.834)</title></circle></g><g class="pt"><line x1="257.0" x2="257.0" y1="96.4" y2="22.8" class="whisker s1"/><circle cx="257.0" cy="51.5" r="4.5" class="dot s1"/><circle cx="257.0" cy="51.5" r="12" class="hit"><title>pass@k, k=4: 0.813 (95% CI 0.577-0.964)</title></circle></g><g class="pt"><line x1="363.5" x2="363.5" y1="83.5" y2="16.1" class="whisker s1"/><circle cx="363.5" cy="39.5" r="4.5" class="dot s1"/><circle cx="363.5" cy="39.5" r="12" class="hit"><title>pass@k, k=8: 0.876 (95% CI 0.645-0.999)</title></circle></g><g class="pt"><line x1="470.0" x2="470.0" y1="73.0" y2="16.0" class="whisker s1"/><circle cx="470.0" cy="35.0" r="4.5" class="dot s1"/><circle cx="470.0" cy="35.0" r="12" class="hit"><title>pass@k, k=16: 0.900 (95% CI 0.700-1.000)</title></circle></g><text x="480.0" y="39.0" class="label">pass@k</text><path d="M44.0,116.9 L150.5,154.7 L257.0,185.3 L363.5,200.8 L470.0,206.0" class="line s2"/><g class="pt"><line x1="44.0" x2="44.0" y1="147.8" y2="84.9" class="whisker s2"/><circle cx="44.0" cy="116.9" r="4.5" class="dot s2"/><circle cx="44.0" cy="116.9" r="12" class="hit"><title>pass^k, k=1: 0.469 (95% CI 0.306-0.637)</title></circle></g><g class="pt"><line x1="150.5" x2="150.5" y1="179.2" y2="120.5" class="whisker s2"/><circle cx="150.5" cy="154.7" r="4.5" class="dot s2"/><circle cx="150.5" cy="154.7" r="12" class="hit"><title>pass^k, k=2: 0.270 (95% CI 0.141-0.450)</title></circle></g><g class="pt"><line x1="257.0" x2="257.0" y1="200.3" y2="152.3" class="whisker s2"/><circle cx="257.0" cy="185.3" r="4.5" class="dot s2"/><circle cx="257.0" cy="185.3" r="12" class="hit"><title>pass^k, k=4: 0.109 (95% CI 0.030-0.283)</title></circle></g><g class="pt"><line x1="363.5" x2="363.5" y1="205.9" y2="173.0" class="whisker s2"/><circle cx="363.5" cy="200.8" r="4.5" class="dot s2"/><circle cx="363.5" cy="200.8" r="12" class="hit"><title>pass^k, k=8: 0.028 (95% CI 0.000-0.174)</title></circle></g><g class="pt"><line x1="470.0" x2="470.0" y1="206.0" y2="187.0" class="whisker s2"/><circle cx="470.0" cy="206.0" r="4.5" class="dot s2"/><circle cx="470.0" cy="206.0" r="12" class="hit"><title>pass^k, k=16: 0.000 (95% CI 0.000-0.100)</title></circle></g><text x="480.0" y="210.0" class="label">pass^k</text></svg>
+<p class="muted">Whiskers: 95% two-stage bootstrap CIs (tasks, then runs within task). Hover a point for values.</p>
+
+<h3>Flaky tasks, ranked by suite pass^16 gain if fixed</h3>
+<div class="scroll"><table>
+<thead><tr><th>#</th><th>Task</th><th class="num">Passes</th><th class="num">pass@1 (95% CI)</th><th class="num">pass^16</th><th class="num">Gain if fixed</th><th>Divergence</th></tr></thead><tbody>
+
+<tr><td>1</td><td><code>t01_sum_to</code></td><td class="num">7/16</td>
+<td class="num">43.8% (19.8%–70.1%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.100</td>
+<td><a href="#div-t01_sum_to"><code>patch_generator:llm:llm#1</code></a></td></tr>
+
+<tr><td>2</td><td><code>t02_binary_search</code></td><td class="num">8/16</td>
+<td class="num">50.0% (24.7%–75.3%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.100</td>
+<td><a href="#div-t02_binary_search"><code>verifier:tool:ast_analyze#1</code></a></td></tr>
+
+<tr><td>3</td><td><code>t09_late_binding</code></td><td class="num">10/16</td>
+<td class="num">62.5% (35.4%–84.8%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.100</td>
+<td><a href="#div-t09_late_binding"><code>patch_generator:llm:llm#2</code></a></td></tr>
+
+<tr><td>4</td><td><code>t10_remove_negatives</code></td><td class="num">12/16</td>
+<td class="num">75.0% (47.6%–92.7%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.100</td>
+<td><a href="#div-t10_remove_negatives"><code>patch_generator:llm:llm#2</code></a></td></tr>
+
+<tr><td>5</td><td><code>t12_fibonacci</code></td><td class="num">2/16</td>
+<td class="num">12.5% (1.6%–38.3%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.100</td>
+<td><a href="#div-t12_fibonacci"><code>patch_generator:llm:llm#2</code></a></td></tr>
+
+<tr><td>6</td><td><code>t13_count_digits</code></td><td class="num">14/16</td>
+<td class="num">87.5% (61.7%–98.4%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.100</td>
+<td><a href="#div-t13_count_digits"><code>patch_generator:llm:llm#1</code></a></td></tr>
+
+<tr><td>7</td><td><code>t14_safe_divide</code></td><td class="num">9/16</td>
+<td class="num">56.2% (29.9%–80.2%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.100</td>
+<td><a href="#div-t14_safe_divide"><code>patch_generator:llm:llm#1</code></a></td></tr>
+
+<tr><td>8</td><td><code>t18_stack</code></td><td class="num">6/16</td>
+<td class="num">37.5% (15.2%–64.6%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.100</td>
+<td><a href="#div-t18_stack"><code>patch_generator:llm:llm#1</code></a></td></tr>
+
+<tr><td>9</td><td><code>t20_normalize</code></td><td class="num">7/16</td>
+<td class="num">43.8% (19.8%–70.1%)</td>
+<td class="num">0.000</td>
+<td class="num">+0.100</td>
+<td><a href="#div-t20_normalize"><code>patch_generator:llm:llm#2</code></a></td></tr>
+</tbody></table></div>
+<p>Stable-fail (broken, not flaky): <code>t16_rotate</code></p>
+
+<details><summary>All tasks (table view)</summary><div class="scroll"><table>
+<thead><tr><th>Task</th><th>Label</th><th class="num">Passes</th><th class="num">pass@1</th><th class="num">pass@2</th><th class="num">pass^2</th><th class="num">pass@4</th><th class="num">pass^4</th><th class="num">pass@8</th><th class="num">pass^8</th><th class="num">pass@16</th><th class="num">pass^16</th></tr></thead><tbody>
+<tr><td><code>t01_sum_to</code></td><td>flaky</td><td class="num">7/16</td>
+<td class="num">0.438</td><td class="num">0.700</td><td class="num">0.175</td><td class="num">0.931</td><td class="num">0.019</td><td class="num">0.999</td><td class="num">0.000</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t02_binary_search</code></td><td>flaky</td><td class="num">8/16</td>
+<td class="num">0.500</td><td class="num">0.767</td><td class="num">0.233</td><td class="num">0.962</td><td class="num">0.038</td><td class="num">1.000</td><td class="num">0.000</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t09_late_binding</code></td><td>flaky</td><td class="num">10/16</td>
+<td class="num">0.625</td><td class="num">0.875</td><td class="num">0.375</td><td class="num">0.992</td><td class="num">0.115</td><td class="num">1.000</td><td class="num">0.003</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t10_remove_negatives</code></td><td>flaky</td><td class="num">12/16</td>
+<td class="num">0.750</td><td class="num">0.950</td><td class="num">0.550</td><td class="num">0.999</td><td class="num">0.272</td><td class="num">1.000</td><td class="num">0.038</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t12_fibonacci</code></td><td>flaky</td><td class="num">2/16</td>
+<td class="num">0.125</td><td class="num">0.242</td><td class="num">0.008</td><td class="num">0.450</td><td class="num">0.000</td><td class="num">0.767</td><td class="num">0.000</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t13_count_digits</code></td><td>flaky</td><td class="num">14/16</td>
+<td class="num">0.875</td><td class="num">0.992</td><td class="num">0.758</td><td class="num">1.000</td><td class="num">0.550</td><td class="num">1.000</td><td class="num">0.233</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t14_safe_divide</code></td><td>flaky</td><td class="num">9/16</td>
+<td class="num">0.562</td><td class="num">0.825</td><td class="num">0.300</td><td class="num">0.981</td><td class="num">0.069</td><td class="num">1.000</td><td class="num">0.001</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t16_rotate</code></td><td>stable-fail</td><td class="num">0/16</td>
+<td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td></tr><tr><td><code>t18_stack</code></td><td>flaky</td><td class="num">6/16</td>
+<td class="num">0.375</td><td class="num">0.625</td><td class="num">0.125</td><td class="num">0.885</td><td class="num">0.008</td><td class="num">0.997</td><td class="num">0.000</td><td class="num">1.000</td><td class="num">0.000</td></tr><tr><td><code>t20_normalize</code></td><td>flaky</td><td class="num">7/16</td>
+<td class="num">0.438</td><td class="num">0.700</td><td class="num">0.175</td><td class="num">0.931</td><td class="num">0.019</td><td class="num">0.999</td><td class="num">0.000</td><td class="num">1.000</td><td class="num">0.000</td></tr>
+</tbody></table></div></details>
+
+
+
+<h2>Recurring failure modes</h2>
+<p class="muted">Clusters are formed deterministically from divergence signatures; names are templates.</p>
+<div class="scroll"><table><thead><tr><th>Mode</th><th class="num">Tasks</th><th>Step</th><th>Kind</th><th>Tasks</th></tr></thead><tbody>
+<tr><td>decision divergence at patch_generator:llm:llm</td><td class="num">8</td><td><code>patch_generator:llm:llm</code></td><td>decision</td><td><code>t01_sum_to</code>, <code>t09_late_binding</code>, <code>t10_remove_negatives</code>, <code>t12_fibonacci</code>, <code>t13_count_digits</code>, <code>t14_safe_divide</code>, <code>t18_stack</code>, <code>t20_normalize</code></td></tr><tr><td>inserted divergence at verifier:tool:ast_analyze</td><td class="num">1</td><td><code>verifier:tool:ast_analyze</code></td><td>inserted</td><td><code>t02_binary_search</code></td></tr>
+</tbody></table></div>
+
+
+
+<h2>Where passing and failing runs split</h2>
+
+<details id="div-t01_sum_to" open>
+<summary><code>t01_sum_to</code> · <code>patch_generator:llm:llm#1</code> (inserted) · 7 passing vs 9 failing (flaky)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.343 (failing) vs 0.048 (passing), permutation p = 0.010; 33.3% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>patch_generator:llm:llm#1</code>, <code>patch_generator:llm:llm#2</code>, <code>verifier:tool:run_tests#2</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run bfd2eda75a49)</h4><code>inspector:llm:llm#1</code><pre>{
+ "patched_code": "def sum_to(n):\n    total = 0\n    for i in range(n + 1):\n        total += i\n    return total"
+}</pre></div>
+<div class="card"><h4>Failing (run 1f20c2eb3f05)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "def sum_to(n):\n    if n == 0:\n        return 0\n    total = 0\n    for i in range(n):\n        total += i\n    return total"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;patched_code&#34;: &#34;def sum_to(n):\n    total = 0\n    for i in range(n + 1):\n        total += i\n    return total&#34;</span><span class="add">+ &#34;patched_code&#34;: &#34;def sum_to(n):\n    if n == 0:\n        return 0\n    total = 0\n    for i in range(n):\n        total += i\n    return total&#34;</span> }
+</pre>
+
+</details>
+
+<details id="div-t02_binary_search" open>
+<summary><code>t02_binary_search</code> · <code>verifier:tool:ast_analyze#1</code> (inserted) · 8 passing vs 8 failing (flaky)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.500 (failing) vs 0.000 (passing), permutation p = 0.038; 50.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>verifier:tool:ast_analyze#1</code>, <code>patch_generator:llm:llm#2</code>, <code>verifier:tool:run_tests#2</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run aff5092947f7)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "def binary_search(a, x):\n    lo, hi = (0, len(a) - 1)\n    while lo \u003c= hi:\n        mid = (lo + hi) // 2\n        if a[mid] == x:\n            return mid\n        elif a[mid] \u003c x:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1"
+}</pre></div>
+<div class="card"><h4>Failing (run 181640aa9534)</h4><code>verifier:tool:ast_analyze#1</code><pre>{
+ "source_code": "def binary_search(a, x):\n    lo, hi = 0, len(a) - 1\n    while lo \u003c= hi:\n        mid = (lo + hi) // 2\n        if a[mid] == x:\n            # Adjust lo to ensure we find the last occurrence of x\n            lo = mid + 1\n        elif a[mid] \u003c x:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    # When lo exceeds hi, we found the last occurrence of x\n    if lo \u003e hi:\n        return lo - 1\n    return -1\n"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;patched_code&#34;: &#34;def binary_search(a, x):\n    lo, hi = (0, len(a) - 1)\n    while lo &lt;= hi:\n        mid = (lo + hi) // 2\n        if a[mid] == x:\n            return mid\n        elif a[mid] &lt; x:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1&#34;</span><span class="add">+ &#34;source_code&#34;: &#34;def binary_search(a, x):\n    lo, hi = 0, len(a) - 1\n    while lo &lt;= hi:\n        mid = (lo + hi) // 2\n        if a[mid] == x:\n            # Adjust lo to ensure we find the last occurrence of x\n            lo = mid + 1\n        elif a[mid] &lt; x:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    # When lo exceeds hi, we found the last occurrence of x\n    if lo &gt; hi:\n        return lo - 1\n    return -1\n&#34;</span> }
+</pre>
+<h4 class="muted">Observation diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1 +1,24 @@
+<span class="del">-null</span><span class="add">+{</span><span class="add">+ &#34;error&#34;: null,</span><span class="add">+ &#34;result&#34;: {</span><span class="add">+  &#34;findings&#34;: [],</span><span class="add">+  &#34;forbidden_imports&#34;: [],</span><span class="add">+  &#34;functions&#34;: [</span><span class="add">+   {</span><span class="add">+    &#34;args&#34;: [</span><span class="add">+     &#34;a&#34;,</span><span class="add">+     &#34;x&#34;</span><span class="add">+    ],</span><span class="add">+    &#34;complexity&#34;: 5,</span><span class="add">+    &#34;end_lineno&#34;: 15,</span><span class="add">+    &#34;lineno&#34;: 1,</span><span class="add">+    &#34;name&#34;: &#34;binary_search&#34;</span><span class="add">+   }</span><span class="add">+  ],</span><span class="add">+  &#34;imports&#34;: [],</span><span class="add">+  &#34;syntax_error&#34;: null,</span><span class="add">+  &#34;syntax_ok&#34;: true</span><span class="add">+ },</span><span class="add">+ &#34;success&#34;: true,</span><span class="add">+ &#34;type&#34;: &#34;AstReport&#34;</span><span class="add">+}</span></pre>
+
+</details>
+
+<details id="div-t09_late_binding" open>
+<summary><code>t09_late_binding</code> · <code>patch_generator:llm:llm#2</code> (decision) · 10 passing vs 6 failing (flaky)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.583 (failing) vs 0.067 (passing), permutation p = 7.5e-04; 100.0% of failing and 10.0% of passing runs deviate here. Top-3 candidates: <code>patch_generator:llm:llm#2</code>, <code>verifier:tool:ast_analyze#2</code>, <code>verifier:tool:lint#2</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run 7e510d134bbd)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "def make_multipliers(n):\n    return [lambda x, i=i: x * i for i in range(n)]"
+}</pre></div>
+<div class="card"><h4>Failing (run da54b308c7e0)</h4><code>patch_generator:llm:llm#2</code><pre>{
+ "patched_code": "from solution import make_multipliers\n\ndef test_values():\n    fs = make_multipliers(3)\n    assert [f(10) for f in fs] == [0, 10, 20]"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;patched_code&#34;: &#34;def make_multipliers(n):\n    return [lambda x, i=i: x * i for i in range(n)]&#34;</span><span class="add">+ &#34;patched_code&#34;: &#34;from solution import make_multipliers\n\ndef test_values():\n    fs = make_multipliers(3)\n    assert [f(10) for f in fs] == [0, 10, 20]&#34;</span> }
+</pre>
+
+</details>
+
+<details id="div-t10_remove_negatives" >
+<summary><code>t10_remove_negatives</code> · <code>patch_generator:llm:llm#2</code> (inserted) · 12 passing vs 4 failing (flaky)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.750 (failing) vs 0.000 (passing), permutation p = 0.007; 75.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>patch_generator:llm:llm#2</code>, <code>verifier:tool:ast_analyze#1</code>, <code>verifier:tool:lint#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run e3f61fe7c58e)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "source_code": "def remove_negatives(xs):\n    new_list = []\n    for x in xs:\n        if x \u003e= 0:\n            new_list.append(x)\n    return new_list\n"
+}</pre></div>
+<div class="card"><h4>Failing (run f5776493ba29)</h4><code>patch_generator:llm:llm#2</code><pre>{
+ "patched_code": "def remove_negatives(xs):\n    xs_copy = xs[:]\n    for x in xs_copy:\n        if x \u003c 0:\n            xs.remove(x)\n    return xs"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;source_code&#34;: &#34;def remove_negatives(xs):\n    new_list = []\n    for x in xs:\n        if x &gt;= 0:\n            new_list.append(x)\n    return new_list\n&#34;</span><span class="add">+ &#34;patched_code&#34;: &#34;def remove_negatives(xs):\n    xs_copy = xs[:]\n    for x in xs_copy:\n        if x &lt; 0:\n            xs.remove(x)\n    return xs&#34;</span> }
+</pre>
+<h4 class="muted">Observation diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,23 +1 @@
+<span class="del">-{</span><span class="del">- &#34;error&#34;: null,</span><span class="del">- &#34;result&#34;: {</span><span class="del">-  &#34;findings&#34;: [],</span><span class="del">-  &#34;forbidden_imports&#34;: [],</span><span class="del">-  &#34;functions&#34;: [</span><span class="del">-   {</span><span class="del">-    &#34;args&#34;: [</span><span class="del">-     &#34;xs&#34;</span><span class="del">-    ],</span><span class="del">-    &#34;complexity&#34;: 3,</span><span class="del">-    &#34;end_lineno&#34;: 6,</span><span class="del">-    &#34;lineno&#34;: 1,</span><span class="del">-    &#34;name&#34;: &#34;remove_negatives&#34;</span><span class="del">-   }</span><span class="del">-  ],</span><span class="del">-  &#34;imports&#34;: [],</span><span class="del">-  &#34;syntax_error&#34;: null,</span><span class="del">-  &#34;syntax_ok&#34;: true</span><span class="del">- },</span><span class="del">- &#34;success&#34;: true,</span><span class="del">- &#34;type&#34;: &#34;AstReport&#34;</span><span class="del">-}</span><span class="add">+null</span></pre>
+
+</details>
+
+<details id="div-t12_fibonacci" >
+<summary><code>t12_fibonacci</code> · <code>patch_generator:llm:llm#2</code> (decision) · 2 passing vs 14 failing (flaky)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.264 (failing) vs 0.000 (passing), permutation p = 0.025; 7.1% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>patch_generator:llm:llm#2</code>, <code>verifier:tool:run_tests#2</code>, <code>patch_generator:llm:llm#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run 4349b7876de3)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "from functools import lru_cache\n\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n \u003c= 1:\n        return n\n    return fib(n - 1) + fib(n - 2)"
+}</pre></div>
+<div class="card"><h4>Failing (run a3c8b62d9714)</h4><code>patch_generator:llm:llm#2</code><pre>{
+ "patched_code": "from functools import lru_cache\nfrom typing import *\nfrom collections import *\n\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n \u003c= 1:\n        return 1\n    a, b = (0, 1)\n    for _ in range(2, n + 1):\n        a, b = (b, a + b)\n    return b"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;patched_code&#34;: &#34;from functools import lru_cache\n\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n &lt;= 1:\n        return n\n    return fib(n - 1) + fib(n - 2)&#34;</span><span class="add">+ &#34;patched_code&#34;: &#34;from functools import lru_cache\nfrom typing import *\nfrom collections import *\n\n@lru_cache(maxsize=None)\ndef fib(n):\n    if n &lt;= 1:\n        return 1\n    a, b = (0, 1)\n    for _ in range(2, n + 1):\n        a, b = (b, a + b)\n    return b&#34;</span> }
+</pre>
+
+</details>
+
+<details id="div-t13_count_digits" >
+<summary><code>t13_count_digits</code> · <code>patch_generator:llm:llm#1</code> (decision) · 14 passing vs 2 failing (flaky)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.125 (failing) vs 0.007 (passing), permutation p = 0.008; 0.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>patch_generator:llm:llm#1</code>, <code>verifier:tool:ast_analyze#2</code>, <code>verifier:tool:lint#2</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run 0f617fcf0d77)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "def count_digits(n):\n    n = abs(n)\n    if n == 0:\n        return 1\n    count = 0\n    while n \u003e 0:\n        n = n // 10\n        count += 1\n    return count"
+}</pre></div>
+<div class="card"><h4>Failing (run 1272f7023ef0)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "def count_digits(n):\n    n = abs(n)\n    count = 0\n    while n \u003e 0:\n        n = n // 10\n        count += 1\n    return count"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;patched_code&#34;: &#34;def count_digits(n):\n    n = abs(n)\n    if n == 0:\n        return 1\n    count = 0\n    while n &gt; 0:\n        n = n // 10\n        count += 1\n    return count&#34;</span><span class="add">+ &#34;patched_code&#34;: &#34;def count_digits(n):\n    n = abs(n)\n    count = 0\n    while n &gt; 0:\n        n = n // 10\n        count += 1\n    return count&#34;</span> }
+</pre>
+
+</details>
+
+<details id="div-t14_safe_divide" >
+<summary><code>t14_safe_divide</code> · <code>patch_generator:llm:llm#1</code> (decision) · 9 passing vs 7 failing (flaky)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.235 (failing) vs 0.050 (passing), permutation p = 0.004; 0.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>patch_generator:llm:llm#1</code>, <code>verifier:tool:ast_analyze#1</code>, <code>patch_generator:llm:llm#2</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run 9547f8d553bd)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return None\n    except TypeError:\n        raise"
+}</pre></div>
+<div class="card"><h4>Failing (run 01f818655e9d)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "def safe_divide(a, b):\n    if b == 0:\n        return 0\n    try:\n        return a / b\n    except:\n        return 0"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;patched_code&#34;: &#34;def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return None\n    except TypeError:\n        raise&#34;</span><span class="add">+ &#34;patched_code&#34;: &#34;def safe_divide(a, b):\n    if b == 0:\n        return 0\n    try:\n        return a / b\n    except:\n        return 0&#34;</span> }
+</pre>
+
+</details>
+
+<details id="div-t18_stack" >
+<summary><code>t18_stack</code> · <code>patch_generator:llm:llm#1</code> (decision) · 6 passing vs 10 failing (flaky)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.146 (failing) vs 0.034 (passing), permutation p = 0.002; 0.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>patch_generator:llm:llm#1</code>, <code>verifier:tool:ast_analyze#1</code>, <code>patch_generator:llm:llm#3</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run cb70ae2a1d3c)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "class Stack:\n\n    def __init__(self):\n        self.items = []\n\n    def push(self, x):\n        self.items.append(x)\n\n    def pop(self):\n        return self.items.pop()\n\n    def peek(self):\n        return self.items[-1]\n\n    def __len__(self):\n        return len(self.items)"
+}</pre></div>
+<div class="card"><h4>Failing (run e02af952524f)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "class Stack:\n\n    def __init__(self):\n        self.items = []\n\n    def push(self, x):\n        self.items.append(x)\n\n    def pop(self):\n        return self.items.pop()\n\n    def peek(self):\n        if not self.is_empty():\n            return self.items[0]\n        else:\n            raise IndexError(\u0027peek() called on an empty stack\u0027)\n\n    def __len__(self):\n        return len(self.items)\n\n    def is_empty(self):\n        return len(self.items) == 0"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;patched_code&#34;: &#34;class Stack:\n\n    def __init__(self):\n        self.items = []\n\n    def push(self, x):\n        self.items.append(x)\n\n    def pop(self):\n        return self.items.pop()\n\n    def peek(self):\n        return self.items[-1]\n\n    def __len__(self):\n        return len(self.items)&#34;</span><span class="add">+ &#34;patched_code&#34;: &#34;class Stack:\n\n    def __init__(self):\n        self.items = []\n\n    def push(self, x):\n        self.items.append(x)\n\n    def pop(self):\n        return self.items.pop()\n\n    def peek(self):\n        if not self.is_empty():\n            return self.items[0]\n        else:\n            raise IndexError(&#39;peek() called on an empty stack&#39;)\n\n    def __len__(self):\n        return len(self.items)\n\n    def is_empty(self):\n        return len(self.items) == 0&#34;</span> }
+</pre>
+
+</details>
+
+<details id="div-t20_normalize" >
+<summary><code>t20_normalize</code> · <code>patch_generator:llm:llm#2</code> (decision) · 7 passing vs 9 failing (flaky)</summary>
+
+<p>Earliest step where failing runs deviate significantly more than passing runs: nearest-passing-run distance 0.171 (failing) vs 0.062 (passing), permutation p = 0.023; 0.0% of failing and 0.0% of passing runs deviate here. Top-3 candidates: <code>patch_generator:llm:llm#2</code>, <code>verifier:tool:ast_analyze#1</code>, <code>planner:llm:llm#1</code>.</p>
+<div class="side">
+<div class="card"><h4>Passing (reference run 9443e024aa50)</h4><code>patch_generator:llm:llm#1</code><pre>{
+ "patched_code": "def normalize(xs):\n    if all((x == xs[0] for x in xs)):\n        return [0.0] * len(xs)\n    lo = min(xs)\n    hi = max(xs)\n    return [(x - lo) / (hi - lo) for x in xs]"
+}</pre></div>
+<div class="card"><h4>Failing (run b240f2e4dffa)</h4><code>patch_generator:llm:llm#2</code><pre>{
+ "patched_code": "def normalize(xs):\n    if len(set(xs)) == 1:\n        return [0.0] * len(xs)\n    lo = min(xs)\n    hi = max(xs)\n    return [x - lo / (hi - lo) for x in xs]"
+}</pre></div>
+</div>
+
+<h4 class="muted">Decision diff</h4><pre>--- passing(ref)
++++ failing
+@@ -1,3 +1,3 @@
+ {
+<span class="del">- &#34;patched_code&#34;: &#34;def normalize(xs):\n    if all((x == xs[0] for x in xs)):\n        return [0.0] * len(xs)\n    lo = min(xs)\n    hi = max(xs)\n    return [(x - lo) / (hi - lo) for x in xs]&#34;</span><span class="add">+ &#34;patched_code&#34;: &#34;def normalize(xs):\n    if len(set(xs)) == 1:\n        return [0.0] * len(xs)\n    lo = min(xs)\n    hi = max(xs)\n    return [x - lo / (hi - lo) for x in xs]&#34;</span> }
+</pre>
+
+</details>
+
+
+
+<p class="muted" style="margin-top:40px">agentdiff · statistics: Clopper–Pearson, two-stage bootstrap, stratified exact (CMH-conditional) test, Fisher + Holm, Newcombe method 10.</p>
+</main>
+</body>
+</html>

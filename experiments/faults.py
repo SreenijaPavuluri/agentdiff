@@ -104,6 +104,24 @@ class ModelFault(Fault):
         return self.model if node == self.node else None
 
 
+@dataclass
+class OutputTruncationFault(Fault):
+    """The model's reply is cut off (e.g. an output-token limit), leaving an incomplete code block."""
+
+    node: str = "patch_generator"
+    p: float = 0.6
+    keep: float = 0.5
+
+    def patch_response(self, node: str, occurrence: int, text: str, rng: random.Random) -> str:
+        if node != self.node or occurrence != 1 or rng.random() >= self.p:
+            return text
+        cut = text.rfind("```python")
+        if cut < 0:
+            return text[: int(len(text) * self.keep)]
+        body_start = cut + len("```python")
+        return text[: body_start + int((len(text) - body_start) * self.keep)]
+
+
 PC, IN = "patch_generator:llm:llm#1", "inspector:llm:llm#1"
 
 FAULTS: list[Fault] = [
@@ -135,11 +153,18 @@ FAULTS: list[Fault] = [
     ModelFault(id="F13", description="model swap at patch_generator: qwen2.5-coder:1.5b -> 0.5b", true_cause=PC),
 ]
 
+# Batch 2, added AFTER batch 1 showed that none of F01-F12 significantly changed pass@1 for this 1.5B agent
+# (disclosed in the README). Run with k=6 because of time.
+BATCH2: list[Fault] = [
+    OutputTruncationFault(id="F14", description="patcher reply truncated mid-code block on its first call (p=0.6): output-limit failure",
+                          true_cause=PC, intermittent=True),
+]
+
 NULLS: list[Fault] = [
     PromptFault(id="N01", description="whitespace-only edit of the patcher system prompt", true_cause=None,
                 whitespace_only=True),
 ]
 
-BY_ID = {f.id: f for f in FAULTS + NULLS}
+BY_ID = {f.id: f for f in FAULTS + BATCH2 + NULLS}
 
 _ = prompts  # imported so a codeverify upgrade that renames prompts fails loudly here
