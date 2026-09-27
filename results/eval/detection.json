@@ -1,0 +1,327 @@
+{
+ "faults": [
+  {
+   "id": "F01",
+   "description": "inspector run_tests returns tracebacks/messages truncated to 40 chars (p=0.5)",
+   "intermittent": true,
+   "expected_cause": "inspector:tool:run_tests#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 50,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.475,
+   "effect_vs_16": 0.00625,
+   "effect_ci_vs_16": [
+    -0.175,
+    0.175
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.8431929702119693,
+   "gate_delta": 0.0625,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F02",
+   "description": "inspector run_tests reports a sandbox timeout instead of results (p=0.5)",
+   "intermittent": true,
+   "expected_cause": "inspector:tool:run_tests#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 30,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.4875,
+   "effect_vs_16": 0.01875,
+   "effect_ci_vs_16": [
+    -0.125,
+    0.1625
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.891477426396985,
+   "gate_delta": 0.075,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F03",
+   "description": "inspector prompt edit: 'the bug is always on line 1; cite only line 1'",
+   "intermittent": false,
+   "expected_cause": "inspector:llm:llm#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 80,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.3875,
+   "effect_vs_16": -0.08125,
+   "effect_ci_vs_16": [
+    -0.25015624999999997,
+    0.1
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.4296618872656376,
+   "gate_delta": -0.025,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F04",
+   "description": "patcher prompt drops the INSPECTOR REPORT section (localization ignored)",
+   "intermittent": false,
+   "expected_cause": "patch_generator:llm:llm#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 80,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.5625,
+   "effect_vs_16": 0.09375,
+   "effect_ci_vs_16": [
+    -0.04375,
+    0.2375
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.9934522966089943,
+   "gate_delta": 0.15,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F05",
+   "description": "patcher prompt edit: 'special-case the inputs shown in the tests'",
+   "intermittent": false,
+   "expected_cause": "patch_generator:llm:llm#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 80,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.5,
+   "effect_vs_16": 0.03125,
+   "effect_ci_vs_16": [
+    -0.1625,
+    0.225
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.9155849118742072,
+   "gate_delta": 0.0875,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F06",
+   "description": "context-window truncation: patcher user prompt cut to its first 700 characters",
+   "intermittent": false,
+   "expected_cause": "patch_generator:llm:llm#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 76,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.6375,
+   "effect_vs_16": 0.16875,
+   "effect_ci_vs_16": [
+    0.00625,
+    0.33125
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.9996026382963481,
+   "gate_delta": 0.225,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F07",
+   "description": "patcher sampling temperature raised from 0.7 to 1.5",
+   "intermittent": false,
+   "expected_cause": "patch_generator:llm:llm#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 80,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.2875,
+   "effect_vs_16": -0.18125,
+   "effect_ci_vs_16": [
+    -0.3875,
+    0.01875
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.062012236406235474,
+   "gate_delta": -0.125,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F08",
+   "description": "patcher prompt edit: 'rewrite the whole module in a different style'",
+   "intermittent": false,
+   "expected_cause": "patch_generator:llm:llm#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 80,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.5375,
+   "effect_vs_16": 0.06875,
+   "effect_ci_vs_16": [
+    -0.0875,
+    0.21875
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.9713245896839593,
+   "gate_delta": 0.125,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F09",
+   "description": "verifier run_tests spuriously fails the first test (p=0.5): flaky sandbox",
+   "intermittent": true,
+   "expected_cause": "verifier:tool:run_tests#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 68,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.425,
+   "effect_vs_16": -0.04375,
+   "effect_ci_vs_16": [
+    -0.23125,
+    0.14375
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.6391767764390827,
+   "gate_delta": 0.0125,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F10",
+   "description": "retry context loss: on patch retries the previous attempt and its feedback are dropped",
+   "intermittent": false,
+   "expected_cause": "first patch_generator call on a retry (occurrence varies with structured-output repairs)",
+   "n_runs": 80,
+   "runs_where_fault_fired": 38,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.5125,
+   "effect_vs_16": 0.04375,
+   "effect_ci_vs_16": [
+    -0.1125,
+    0.2
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.9442935111788423,
+   "gate_delta": 0.1,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F11",
+   "description": "inspector lint reports a spurious fatal E999 at line 1 (p=0.5)",
+   "intermittent": true,
+   "expected_cause": "inspector:tool:lint#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 50,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.425,
+   "effect_vs_16": -0.04375,
+   "effect_ci_vs_16": [
+    -0.20625,
+    0.1125
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.638302789917477,
+   "gate_delta": 0.0125,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F12",
+   "description": "inspector ast_analyze adds a bogus finding at line 1 (p=0.5)",
+   "intermittent": true,
+   "expected_cause": "inspector:tool:ast_analyze#1",
+   "n_runs": 80,
+   "runs_where_fault_fired": 30,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.5,
+   "effect_vs_16": 0.03125,
+   "effect_ci_vs_16": [
+    -0.15625,
+    0.21875
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.9268520635228988,
+   "gate_delta": 0.0875,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  },
+  {
+   "id": "F13",
+   "description": "model swap at patch_generator: qwen2.5-coder:1.5b -> 0.5b",
+   "intermittent": false,
+   "expected_cause": "patch_generator:llm:llm#1",
+   "n_runs": 60,
+   "runs_where_fault_fired": 60,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.0,
+   "effect_vs_16": -0.46875,
+   "effect_ci_vs_16": [
+    -0.6375,
+    -0.30625
+   ],
+   "effect_ci_excludes_0": true,
+   "gate_regression": true,
+   "gate_p_worse": 4.9251827879288984e-11,
+   "gate_delta": -0.4125,
+   "gate_regressed_tasks": [
+    "t13_count_digits"
+   ],
+   "gate_reason": "overall pass rate dropped -0.412 (stratified exact p=4.9e-11 < 0.025); 1 task(s) regressed after Holm correction: t13_count_digits"
+  },
+  {
+   "id": "F14",
+   "description": "patcher reply truncated mid-code block on its first call (p=0.6): output-limit failure",
+   "intermittent": true,
+   "expected_cause": "patch_generator:llm:llm#1",
+   "n_runs": 60,
+   "runs_where_fault_fired": 60,
+   "base_pass1": 0.4125,
+   "cand_pass1": 0.48333333333333334,
+   "effect_vs_16": 0.01458333333333331,
+   "effect_ci_vs_16": [
+    -0.19375000000000003,
+    0.23125
+   ],
+   "effect_ci_excludes_0": false,
+   "gate_regression": false,
+   "gate_p_worse": 0.8647235716342049,
+   "gate_delta": 0.07083333333333332,
+   "gate_regressed_tasks": [],
+   "gate_reason": "no statistically significant regression"
+  }
+ ],
+ "nulls": [
+  {
+   "id": "N01",
+   "description": "whitespace-only edit of the patcher system prompt",
+   "regression": false,
+   "delta": 0.075,
+   "p_worse": 0.8877058110803183,
+   "reason": "no statistically significant regression"
+  },
+  {
+   "id": "A/A",
+   "description": "baseline seeds 0-7 vs seeds 8-15 (same version)",
+   "regression": false,
+   "delta": 0.1125,
+   "p_worse": 0.9627052150419487,
+   "reason": "no statistically significant regression"
+  }
+ ],
+ "aa_splits": {
+  "splits": 500,
+  "false_alarms": 9,
+  "rate": 0.018,
+  "ci": [
+   0.008262954434763135,
+   0.033893696108537937
+  ]
+ }
+}

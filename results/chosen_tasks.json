@@ -1,0 +1,37 @@
+{
+ "tasks": [
+  "t01_sum_to",
+  "t02_binary_search",
+  "t09_late_binding",
+  "t10_remove_negatives",
+  "t12_fibonacci",
+  "t13_count_digits",
+  "t14_safe_divide",
+  "t16_rotate",
+  "t18_stack",
+  "t20_normalize"
+ ],
+ "screen": {
+  "t01_sum_to": "3/4",
+  "t02_binary_search": "2/4",
+  "t03_mutable_default": "4/4",
+  "t04_palindrome": "4/4",
+  "t05_fizzbuzz": "4/4",
+  "t06_merge_sorted": "0/4",
+  "t07_word_count": "4/4",
+  "t08_flatten": "4/4",
+  "t09_late_binding": "1/4",
+  "t10_remove_negatives": "2/4",
+  "t11_median": "0/4",
+  "t12_fibonacci": "2/4",
+  "t13_count_digits": "3/4",
+  "t14_safe_divide": "2/4",
+  "t15_syntax_max": "4/4",
+  "t16_rotate": "1/4",
+  "t17_parse_config": "0/4",
+  "t18_stack": "3/4",
+  "t19_chunk": "4/4",
+  "t20_normalize": "2/4"
+ },
+ "rule": "flaky on screen first (0<c<n), then by screen pass count; seeds 1000-1003 not reused"
+}

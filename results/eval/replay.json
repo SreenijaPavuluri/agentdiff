@@ -1,0 +1,47 @@
+[
+ {
+  "fault": "F13",
+  "task": "t01_sum_to",
+  "truth": "patch_generator:llm:llm#1",
+  "task_id": "t01_sum_to",
+  "intervention": "transplant",
+  "tests": [
+   {
+    "label": "patch_generator:llm:llm#1",
+    "column": 11,
+    "fork_steps": {
+     "94de77f37bba": 5,
+     "9da5a4ffcac7": 5
+    },
+    "resample": {
+     "n": 4,
+     "passed": 4,
+     "replay_divergences": 0,
+     "infra_errors": 0
+    },
+    "keep": {
+     "n": 4,
+     "passed": 0,
+     "replay_divergences": 0,
+     "infra_errors": 0
+    },
+    "delta": 1.0,
+    "lo": 0.3071897350036087,
+    "hi": 1.0,
+    "status": "confirmed",
+    "cost_usd": 0.0,
+    "wall_s": 56.037661749869585,
+    "tokens": 16855
+   }
+  ],
+  "confirmed_label": "patch_generator:llm:llm#1",
+  "predicted_labels": [
+   "patch_generator:llm:llm#1",
+   "verifier:tool:ast_analyze#1",
+   "verifier:tool:lint#1"
+  ],
+  "total_cost_usd": 0.0,
+  "total_wall_s": 56.037661749869585,
+  "total_forks": 8
+ }
+]
